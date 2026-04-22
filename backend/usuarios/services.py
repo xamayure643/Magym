@@ -15,7 +15,7 @@ def enviar_sms_bienvenida(telefono_destino, nombre_usuario):
             telefono_destino = f'+34{telefono_destino}'
 
         mensaje = cliente.messages.create(
-            body=f"¡Hola {nombre_usuario}! Bienvenido a MAGYM. Tu registro se ha completado con éxito.",
+            body=f"¡Hola {nombre_usuario}! Bienvenido a MAGYM. Tu registro se ha completado con exito.",
             from_=settings.TWILIO_PHONE_NUMBER,
             to=telefono_destino
         )
