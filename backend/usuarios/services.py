@@ -1,25 +1,30 @@
+import random
 from twilio.rest import Client
 from django.conf import settings
 
-def enviar_sms_bienvenida(telefono_destino, nombre_usuario):
+def enviar_sms_verificacion(telefono_destino):
     """
-    Se comunica con la API de Twilio para enviar un SMS.
+    Genera un código de 6 dígitos y se comunica con la API de Twilio para enviarlo.
     """
     try:
-        # Iniciamos el cliente de Twilio con las credenciales ocultas
         cliente = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
         
-        # OJO: Twilio necesita el prefijo internacional. 
-        # Si tus usuarios son de España, nos aseguramos de que empiece por +34
+        # 1. Generamos un código aleatorio de 6 cifras
+        codigo_otp = str(random.randint(100000, 999999))
+        
         if not telefono_destino.startswith('+'):
             telefono_destino = f'+34{telefono_destino}'
 
+        # 2. Enviamos el código en el mensaje
         mensaje = cliente.messages.create(
-            body=f"¡Hola {nombre_usuario}! Bienvenido a MAGYM. Tu registro se ha completado con exito.",
+            body=f"MAGYM: Tu código de seguridad es {codigo_otp}. Caduca en 5 minutos. No lo compartas.",
             from_=settings.TWILIO_PHONE_NUMBER,
             to=telefono_destino
         )
-        return True
+        
+        # 3. Devolvemos el código para guardarlo en la Caché de Django
+        return codigo_otp 
+        
     except Exception as e:
         print(f"Error al enviar SMS de Twilio: {e}")
-        return False
+        return None
