@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { registrarUsuario, verificarCodigoSms } from '../services/api';
-import './Registro.css'; 
 
 const Registro = () => {
     const [paso, setPaso] = useState(1);
     
+    // Todos los campos sincronizados con el Backend
     const [formData, setFormData] = useState({
-        nombre: '', correo: '', contrasena: '', telefono: '', peso: '', altura: ''
+        nombre: '', correo: '', contrasena: '', telefono: '', 
+        peso: '', altura: '', genero: '', frecuencia_entrenamiento: '', objetivo: ''
     });
+    
     const [codigoSms, setCodigoSms] = useState('');
-
     const [loading, setLoading] = useState(false);
     const [errores, setErrores] = useState({});
     const [errorVerificacion, setErrorVerificacion] = useState('');
@@ -20,7 +21,12 @@ const Registro = () => {
         if (errores[name]) setErrores({ ...errores, [name]: null });
     };
 
-    // --- FASE 1: REGISTRO ---
+    const handleSiguientePaso = (e) => {
+        e.preventDefault();
+        setPaso(2);
+    };
+
+    // --- SUBMIT FINAL A LA API ---
     const handleSubmitRegistro = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -28,15 +34,18 @@ const Registro = () => {
 
         try {
             await registrarUsuario(formData);
-            setPaso(2); // Pasamos a la pantalla de validación
+            setPaso(3); // Vamos al SMS
         } catch (errorBackend) {
             setErrores(errorBackend);
+            if (errorBackend.nombre || errorBackend.correo || errorBackend.contrasena || errorBackend.telefono) {
+                setPaso(1); // Volver al inicio si fallan las credenciales
+            }
         } finally {
             setLoading(false);
         }
     };
 
-    // --- FASE 2: VERIFICACIÓN REAL ---
+    // --- VERIFICACIÓN SMS ---
     const handleVerificacion = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -46,9 +55,12 @@ const Registro = () => {
             const respuesta = await verificarCodigoSms(formData.correo, codigoSms);
             alert("¡Identidad verificada! " + respuesta.mensaje);
             
-            // LIMPIEZA TOTAL: Reseteamos el formulario al estado inicial
+            // Reiniciar para volver a login/inicio (simulado)
             setPaso(1);
-            setFormData({ nombre: '', correo: '', contrasena: '', telefono: '', peso: '', altura: '' });
+            setFormData({ 
+                nombre: '', correo: '', contrasena: '', telefono: '', 
+                peso: '', altura: '', genero: '', frecuencia_entrenamiento: '', objetivo: '' 
+            });
             setCodigoSms('');
             
         } catch (errorBackend) {
@@ -58,72 +70,146 @@ const Registro = () => {
         }
     };
 
+    // Función auxiliar simple para evitar el error de renderizado de ESLint
+    const renderError = (name) => {
+        return errores[name] ? (
+            <span className="text-red-500 text-xs font-semibold mt-1">
+                {errores[name][0] || errores[name]}
+            </span>
+        ) : null;
+    };
+
     return (
-        <div className="magym-container">
-            <div className="magym-card">
+        <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
+            <div className="bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg p-8 border border-gray-700">
                 
+                {/* Indicador de pasos (Wizard) */}
+                <div className="flex justify-between items-center mb-8">
+                    {[1, 2, 3].map((step) => (
+                        <div key={step} className={`flex items-center ${step < 3 ? 'w-full' : ''}`}>
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${paso >= step ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' : 'bg-gray-700 text-gray-400'}`}>
+                                {step}
+                            </div>
+                            {step < 3 && (
+                                <div className={`h-1 flex-1 mx-2 rounded-full ${paso > step ? 'bg-blue-600' : 'bg-gray-700'}`}></div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+
+                {/* PASO 1: CREDENCIALES */}
                 {paso === 1 && (
-                    <>
-                        <h2 className="magym-title">Únete a MAGYM</h2>
-                        <form onSubmit={handleSubmitRegistro}>
-                            <div className="form-group">
-                                <label>Nombre Completo</label>
-                                <input type="text" name="nombre" className="magym-input" value={formData.nombre} onChange={handleChange} required />
-                                {errores.nombre && <span className="error-text">{errores.nombre[0]}</span>}
-                            </div>
-
-                            <div className="form-group">
-                                <label>Correo Electrónico</label>
-                                <input type="email" name="correo" className="magym-input" value={formData.correo} onChange={handleChange} required />
-                                {errores.correo && <span className="error-text">{errores.correo[0]}</span>}
-                            </div>
-
-                            <div className="form-group">
-                                <label>Contraseña Segura</label>
-                                <input type="password" name="contrasena" className="magym-input" value={formData.contrasena} onChange={handleChange} required placeholder="Mínimo 8 caracteres, 1 mayúscula, 1 número..." />
-                                {errores.contrasena && <span className="error-text">{errores.contrasena[0]}</span>}
-                            </div>
-
-                            <div className="form-group">
-                                <label>Teléfono (Validación SMS)</label>
-                                <input type="tel" name="telefono" className="magym-input" value={formData.telefono} onChange={handleChange} required placeholder="+34 600 000 000" />
-                                {errores.telefono && <span className="error-text">{errores.telefono[0]}</span>}
-                            </div>
-
-                            <div className="biometria-grid">
-                                <div className="form-group">
-                                    <label>Peso (kg)</label>
-                                    <input type="number" step="0.1" name="peso" className="magym-input" value={formData.peso} onChange={handleChange} required />
-                                </div>
-                                <div className="form-group">
-                                    <label>Altura (m)</label>
-                                    <input type="number" step="0.01" name="altura" className="magym-input" value={formData.altura} onChange={handleChange} required />
-                                </div>
-                            </div>
-
-                            {errores.error && <div className="error-text" style={{textAlign: 'center'}}>{errores.error}</div>}
-
-                            <button type="submit" className="magym-button" disabled={loading}>
-                                {loading ? 'Cifrando datos...' : 'Crear Cuenta'}
-                            </button>
-                        </form>
-                    </>
+                    <form onSubmit={handleSiguientePaso} className="space-y-4">
+                        <h2 className="text-2xl font-bold text-white text-center mb-6">Tus Credenciales</h2>
+                        
+                        <div>
+                            <label className="block text-gray-300 text-sm font-medium mb-1">Nombre Completo</label>
+                            <input type="text" name="nombre" value={formData.nombre} onChange={handleChange} required 
+                                className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition" />
+                            {renderError('nombre')}
+                        </div>
+                        <div>
+                            <label className="block text-gray-300 text-sm font-medium mb-1">Correo Electrónico</label>
+                            <input type="email" name="correo" value={formData.correo} onChange={handleChange} required 
+                                className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-blue-500 transition outline-none" />
+                            {renderError('correo')}
+                        </div>
+                        <div>
+                            <label className="block text-gray-300 text-sm font-medium mb-1">Contraseña</label>
+                            <input type="password" name="contrasena" value={formData.contrasena} onChange={handleChange} required placeholder="Mín. 8 caracteres, mayúscula, número, especial"
+                                className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-blue-500 transition outline-none" />
+                            {renderError('contrasena')}
+                        </div>
+                        <div>
+                            <label className="block text-gray-300 text-sm font-medium mb-1">Teléfono (Para SMS)</label>
+                            <input type="tel" name="telefono" value={formData.telefono} onChange={handleChange} required placeholder="+34"
+                                className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-blue-500 transition outline-none" />
+                            {renderError('telefono')}
+                        </div>
+                        
+                        <button type="submit" className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition shadow-lg mt-6">
+                            Siguiente Paso ➔
+                        </button>
+                    </form>
                 )}
 
+                {/* PASO 2: BIOMETRÍA Y OBJETIVOS */}
                 {paso === 2 && (
-                    <div className="verificacion-container">
-                        <div className="verificacion-icono">📱</div>
-                        <h2 className="magym-title">Verificación de Identidad</h2>
-                        <p style={{ color: '#b3b3b3', marginBottom: '25px', fontSize: '14px' }}>
-                            Hemos enviado un código SMS al número terminado en <strong>{formData.telefono.slice(-4)}</strong>. 
+                    <form onSubmit={handleSubmitRegistro} className="space-y-4">
+                        <h2 className="text-2xl font-bold text-white text-center mb-6">Tu Físico y Objetivos</h2>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-gray-300 text-sm font-medium mb-1">Peso (kg)</label>
+                                <input type="number" step="0.1" name="peso" value={formData.peso} onChange={handleChange} required 
+                                    className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                                {renderError('peso')}
+                            </div>
+                            <div>
+                                <label className="block text-gray-300 text-sm font-medium mb-1">Altura (m)</label>
+                                <input type="number" step="0.01" name="altura" value={formData.altura} onChange={handleChange} required 
+                                    className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                                {renderError('altura')}
+                            </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-gray-300 text-sm font-medium mb-1">Género</label>
+                                <select name="genero" value={formData.genero} onChange={handleChange} required className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                                    <option value="">Selecciona...</option>
+                                    <option value="Masculino">Masculino</option>
+                                    <option value="Femenino">Femenino</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                                {renderError('genero')}
+                            </div>
+                            <div>
+                                <label className="block text-gray-300 text-sm font-medium mb-1">Días de entreno</label>
+                                <input type="number" name="frecuencia_entrenamiento" min="1" max="7" value={formData.frecuencia_entrenamiento} onChange={handleChange} required placeholder="1 a 7"
+                                    className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                                {renderError('frecuencia_entrenamiento')}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-gray-300 text-sm font-medium mb-1">Objetivo principal</label>
+                            <select name="objetivo" value={formData.objetivo} onChange={handleChange} required className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="">Selecciona...</option>
+                                <option value="Ganar músculo">Ganar músculo</option>
+                                <option value="Perder grasa">Perder grasa</option>
+                                <option value="Mantenimiento">Mantenimiento</option>
+                            </select>
+                            {renderError('objetivo')}
+                        </div>
+
+                        {errores.general && <div className="text-red-500 text-sm text-center">{errores.general}</div>}
+
+                        <div className="flex gap-4 mt-6">
+                            <button type="button" onClick={() => setPaso(1)} className="w-1/3 py-4 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg transition">
+                                Atrás
+                            </button>
+                            <button type="submit" disabled={loading} className="w-2/3 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition shadow-lg flex justify-center">
+                                {loading ? 'Enviando...' : 'Crear Cuenta ➔'}
+                            </button>
+                        </div>
+                    </form>
+                )}
+
+                {/* PASO 3: VERIFICACIÓN SMS */}
+                {paso === 3 && (
+                    <div className="text-center space-y-6">
+                        <div className="text-6xl mb-4">📱</div>
+                        <h2 className="text-2xl font-bold text-white">Verificación por SMS</h2>
+                        <p className="text-gray-400 text-sm">
+                            Hemos enviado un código SMS de 6 dígitos de seguridad al número terminado en <strong className="text-white">{formData.telefono.slice(-4)}</strong>.
                         </p>
                         
-                        <form onSubmit={handleVerificacion}>
-                            <div className="form-group">
+                        <form onSubmit={handleVerificacion} className="space-y-6">
+                            <div>
                                 <input 
                                     type="text" 
-                                    className="magym-input" 
-                                    style={{ textAlign: 'center', fontSize: '24px', letterSpacing: '8px' }} 
+                                    className="w-full px-4 py-4 rounded-lg bg-gray-800 border-2 border-blue-500 text-white text-center text-3xl tracking-[0.5em] font-mono focus:ring-2 focus:ring-blue-400 outline-none" 
                                     maxLength="6"
                                     placeholder="000000"
                                     value={codigoSms}
@@ -132,10 +218,11 @@ const Registro = () => {
                                 />
                             </div>
                             
-                            {errorVerificacion && <div className="error-text" style={{marginBottom: '15px'}}>{errorVerificacion}</div>}
+                            {errorVerificacion && <div className="text-red-500 text-sm">{errorVerificacion}</div>}
 
-                            <button type="submit" className="magym-button" disabled={loading || codigoSms.length < 6}>
-                                {loading ? 'Verificando...' : 'Confirmar Identidad'}
+                            <button type="submit" disabled={loading || codigoSms.length < 6} 
+                                className="w-full py-4 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition shadow-[0_0_20px_rgba(22,163,74,0.4)] disabled:opacity-50">
+                                {loading ? 'Verificando...' : 'Verificar y Entrar ✔'}
                             </button>
                         </form>
                     </div>
