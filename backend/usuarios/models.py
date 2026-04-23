@@ -21,7 +21,8 @@ class Usuarios(models.Model):
     estado_suscripcion = models.CharField(max_length=50, blank=True, null=True)
     fecha_registro = models.DateTimeField(blank=True, null=True)
     objetivo = models.CharField(max_length=50, choices=OBJETIVO_CHOICES, blank=True, null=True)
-
+    cuenta_activa = models.BooleanField(default=False)
+    
     class Meta:
         managed = False
         db_table = 'usuarios'

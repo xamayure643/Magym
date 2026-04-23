@@ -10,36 +10,34 @@ from .serializers import RegistroUsuarioSerializer
 from .services import enviar_sms_verificacion
 from .models import Usuarios
 
+
 class RegistroUsuarioView(APIView):
     permission_classes = [AllowAny]
+    
     def post(self, request):
-        # 1. Validamos que los datos sean correctos (ej: contraseñas fuertes)
         serializer = RegistroUsuarioSerializer(data=request.data)
         
         if serializer.is_valid():
-            # ¡ATENCIÓN! QUITAMOS EL serializer.save() DE AQUÍ
+            # 1. GUARDAMOS en BD directamente (quedará 'cuenta_activa = False' por el serializer)
+            usuario = serializer.save()
             
             telefono_real = request.data.get('telefono')
             correo = request.data.get('correo') 
 
-            # Generamos y enviamos el SMS
+            # 2. Generamos y enviamos el SMS
             codigo_generado = enviar_sms_verificacion(telefono_real)
             
             if codigo_generado:
-                # 2. GUARDAMOS EL FORMULARIO ENTERO Y EL CÓDIGO EN LA RAM
-                datos_pendientes = {
-                    'datos_usuario': request.data,
-                    'codigo_otp': codigo_generado
-                }
-                cache.set(f"registro_pendiente_{correo}", datos_pendientes, timeout=300) # 5 minutos
+                # 3. Guardamos SOLO el código en la caché
+                cache.set(f"codigo_verificacion_{correo}", codigo_generado, timeout=300) # 5 minutos
                 
                 return Response(
-                    {"mensaje": "Datos validados. SMS enviado. Esperando verificación.", "correo": correo}, 
-                    status=status.HTTP_200_OK # Cambiamos a 200 porque aún no hemos "creado" nada
+                    {"mensaje": "Usuario creado (inactivo). SMS enviado. Esperando verificación.", "correo": correo}, 
+                    status=status.HTTP_201_CREATED
                 )
             else:
                 return Response(
-                    {"error": "Error al enviar el SMS. Inténtalo de nuevo."}, 
+                    {"error": "Error al enviar el SMS. Tu cuenta ha sido creada, pero requiere verificación."}, 
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
@@ -56,33 +54,38 @@ class VerificarCodigoView(APIView):
         if not correo or not codigo_usuario:
             return Response({"error": "Faltan datos."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 1. Recuperamos todo de la caché
-        datos_pendientes = cache.get(f"registro_pendiente_{correo}")
+        # 1. Recuperamos el código de verificación de la caché
+        codigo_guardado = cache.get(f"codigo_verificacion_{correo}")
 
-        if not datos_pendientes:
+        if not codigo_guardado:
             return Response(
                 {"error": "El código ha caducado o no existe. Solicita otro."}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # 2. Comparamos el código
-        if str(datos_pendientes['codigo_otp']) == str(codigo_usuario):
+        # 2. Comparamos el código introducido con el guardado
+        if str(codigo_guardado) == str(codigo_usuario):
             
-            # 3. ¡AHORA SÍ! GUARDAMOS EN LA BASE DE DATOS
-            serializer = RegistroUsuarioSerializer(data=datos_pendientes['datos_usuario'])
-            if serializer.is_valid():
-                serializer.save() # Se inserta en MySQL
+            # 3. ACTIVAMOS AL USUARIO EN LA BBDD
+            try:
+                usuario = Usuarios.objects.get(correo=correo)
+                usuario.cuenta_activa = True   # <--- MARCAMOS LA CUENTA COMO VERIFICADA
+                usuario.save()
                 
-                cache.delete(f"registro_pendiente_{correo}") # Borramos la evidencia de la RAM
+                # Borramos la evidencia de la RAM
+                cache.delete(f"codigo_verificacion_{correo}") 
                 
-                return Response({"mensaje": "Identidad verificada. Cuenta creada con éxito."}, status=status.HTTP_201_CREATED)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"mensaje": "Identidad verificada. Cuenta activada con éxito."}, status=status.HTTP_200_OK)
+            
+            except Usuarios.DoesNotExist:
+                return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
         else:
             return Response({"error": "El código es incorrecto."}, status=status.HTTP_400_BAD_REQUEST)
 
+
 class LoginUsuarioView(APIView):
     permission_classes = [AllowAny]
+    
     def post(self, request):
         correo_recibido = request.data.get('correo')
         contrasena_recibida = request.data.get('contrasena')
@@ -94,6 +97,12 @@ class LoginUsuarioView(APIView):
             usuario = Usuarios.objects.get(correo=correo_recibido)
         except Usuarios.DoesNotExist:
             return Response({"error": "Credenciales inválidas"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # VALIDACIÓN EXTRA: Bloqueamos si la cuenta no ha sido verificada por SMS
+        if not usuario.cuenta_activa:
+            return Response({
+                "error": "Tu cuenta aún no está verificada. Por favor, verifica el código SMS antes de iniciar sesión."
+            }, status=status.HTTP_403_FORBIDDEN)
 
         if check_password(contrasena_recibida, usuario.contrasena):
             refresh = RefreshToken()
