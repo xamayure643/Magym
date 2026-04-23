@@ -4,7 +4,7 @@ from django.db import models
 class Ejercicios(models.Model):
     id_ejercicio = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
-    grupo_muscular = models.CharField(max_length=50)
+    grupo_muscular = models.CharField(max_length=255)
     descripcion = models.TextField(blank=True, null=True)
     guia_ejecucion = models.CharField(max_length=255, blank=True, null=True)
 

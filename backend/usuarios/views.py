@@ -65,17 +65,29 @@ class VerificarCodigoView(APIView):
 
         # 2. Comparamos el código introducido con el guardado
         if str(codigo_guardado) == str(codigo_usuario):
-            
             # 3. ACTIVAMOS AL USUARIO EN LA BBDD
             try:
                 usuario = Usuarios.objects.get(correo=correo)
-                usuario.cuenta_activa = True   # <--- MARCAMOS LA CUENTA COMO VERIFICADA
+                usuario.cuenta_activa = True
                 usuario.save()
                 
                 # Borramos la evidencia de la RAM
                 cache.delete(f"codigo_verificacion_{correo}") 
                 
-                return Response({"mensaje": "Identidad verificada. Cuenta activada con éxito."}, status=status.HTTP_200_OK)
+                # 4. AUTO-LOGIN: Generamos tokens para iniciar sesión directamente tras verificar SMS
+                refresh = RefreshToken()
+                # ¡IMPORTANTE: TIENE QUE LLAMARSE user_id PARA QUE SIMPLE_JWT LO ENTIENDA!
+                refresh['user_id'] = usuario.id_usuario 
+                refresh['nombre'] = usuario.nombre
+                refresh['correo'] = usuario.correo
+                
+                return Response({
+                    "mensaje": "Identidad verificada. Cuenta activada con éxito.",
+                    "access": str(refresh.access_token),
+                    "refresh": str(refresh),
+                    "nombre": usuario.nombre,
+                    "usuario_id": usuario.id_usuario
+                }, status=status.HTTP_200_OK)
             
             except Usuarios.DoesNotExist:
                 return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
@@ -101,12 +113,13 @@ class LoginUsuarioView(APIView):
         # VALIDACIÓN EXTRA: Bloqueamos si la cuenta no ha sido verificada por SMS
         if not usuario.cuenta_activa:
             return Response({
-                "error": "Tu cuenta aún no está verificada. Por favor, verifica el código SMS antes de iniciar sesión."
+                "error": "Tu cuenta aún no está verificada. Por favor, verifica el código SMS."
             }, status=status.HTTP_403_FORBIDDEN)
 
         if check_password(contrasena_recibida, usuario.contrasena):
             refresh = RefreshToken()
-            refresh['usuario_id'] = usuario.id_usuario
+            # ¡CORREGIDO! De usuario_id a user_id
+            refresh['user_id'] = usuario.id_usuario
             refresh['nombre'] = usuario.nombre
             refresh['correo'] = usuario.correo
 
@@ -119,8 +132,7 @@ class LoginUsuarioView(APIView):
             }, status=status.HTTP_200_OK)
         else:
             return Response({"error": "Credenciales inválidas"}, status=status.HTTP_401_UNAUTHORIZED)
-
-
+        
 class RefreshTokenView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):

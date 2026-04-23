@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { registrarUsuario, verificarCodigoSms } from '../services/api';
+import { AuthContext } from '../contexts/AuthContext';
 
 const Registro = () => {
     const [paso, setPaso] = useState(1);
+    const { login } = useContext(AuthContext); // Extraemos la función de login del contexto
     
     // Todos los campos sincronizados con el Backend
     const [formData, setFormData] = useState({
@@ -45,23 +47,19 @@ const Registro = () => {
         }
     };
 
-    // --- VERIFICACIÓN SMS ---
+    // --- VERIFICACIÓN SMS CON AUTO-LOGIN ---
     const handleVerificacion = async (e) => {
         e.preventDefault();
         setLoading(true);
         setErrorVerificacion(''); 
         
         try {
+            // El backend ahora devuelve los tokens (access y refresh) junto con el mensaje
             const respuesta = await verificarCodigoSms(formData.correo, codigoSms);
-            alert("¡Identidad verificada! " + respuesta.mensaje);
             
-            // Reiniciar para volver a login/inicio (simulado)
-            setPaso(1);
-            setFormData({ 
-                nombre: '', correo: '', contrasena: '', telefono: '', 
-                peso: '', altura: '', genero: '', frecuencia_entrenamiento: '', objetivo: '' 
-            });
-            setCodigoSms('');
+            // Disparamos el login pasando la respuesta. 
+            // El AuthContext mapeará los tokens y nos redirigirá automáticamente a '/catalogo'
+            login(respuesta);
             
         } catch (errorBackend) {
             setErrorVerificacion(errorBackend.error || "Error al verificar el código");
@@ -198,34 +196,21 @@ const Registro = () => {
 
                 {/* PASO 3: VERIFICACIÓN SMS */}
                 {paso === 3 && (
-                    <div className="text-center space-y-6">
-                        <div className="text-6xl mb-4">📱</div>
-                        <h2 className="text-2xl font-bold text-white">Verificación por SMS</h2>
-                        <p className="text-gray-400 text-sm">
-                            Hemos enviado un código SMS de 6 dígitos de seguridad al número terminado en <strong className="text-white">{formData.telefono.slice(-4)}</strong>.
-                        </p>
+                    <form onSubmit={handleVerificacion} className="space-y-4">
+                        <h2 className="text-2xl font-bold text-white text-center mb-2">Verifica tu Teléfono</h2>
+                        <p className="text-gray-400 text-sm text-center mb-6">Hemos enviado un código SMS de 6 dígitos a <span className="font-bold text-white">{formData.telefono}</span>.</p>
                         
-                        <form onSubmit={handleVerificacion} className="space-y-6">
-                            <div>
-                                <input 
-                                    type="text" 
-                                    className="w-full px-4 py-4 rounded-lg bg-gray-800 border-2 border-blue-500 text-white text-center text-3xl tracking-[0.5em] font-mono focus:ring-2 focus:ring-blue-400 outline-none" 
-                                    maxLength="6"
-                                    placeholder="000000"
-                                    value={codigoSms}
-                                    onChange={(e) => setCodigoSms(e.target.value.replace(/\D/g, ''))} 
-                                    required 
-                                />
-                            </div>
-                            
-                            {errorVerificacion && <div className="text-red-500 text-sm">{errorVerificacion}</div>}
+                        <div>
+                            <input type="text" name="codigoSms" value={codigoSms} onChange={(e) => setCodigoSms(e.target.value)} required placeholder="123456" maxLength={6}
+                                className="w-full px-4 py-4 text-center tracking-[0.5em] text-2xl rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                        </div>
 
-                            <button type="submit" disabled={loading || codigoSms.length < 6} 
-                                className="w-full py-4 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition shadow-[0_0_20px_rgba(22,163,74,0.4)] disabled:opacity-50">
-                                {loading ? 'Verificando...' : 'Verificar y Entrar ✔'}
-                            </button>
-                        </form>
-                    </div>
+                        {errorVerificacion && <div className="text-red-500 text-sm font-semibold text-center">{errorVerificacion}</div>}
+
+                        <button type="submit" disabled={loading || codigoSms.length < 6} className="w-full py-4 mt-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white font-bold rounded-lg transition shadow-lg">
+                            {loading ? 'Comprobando...' : 'Confirmar Identidad y Acceder'}
+                        </button>
+                    </form>
                 )}
 
             </div>
