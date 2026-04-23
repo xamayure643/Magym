@@ -3,6 +3,11 @@ from .fields import EncryptedDataField
 
 # Create your models here.
 class Usuarios(models.Model):
+    OBJETIVO_CHOICES = [
+        ('Ganar músculo', 'Ganar músculo'),
+        ('Perder grasa', 'Perder grasa'),
+        ('Mantenimiento', 'Mantenimiento'),
+    ]
     id_usuario = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
     correo = models.CharField(unique=True, max_length=150)
@@ -15,6 +20,7 @@ class Usuarios(models.Model):
     frecuencia_entrenamiento = models.IntegerField(blank=True, null=True)
     estado_suscripcion = models.CharField(max_length=50, blank=True, null=True)
     fecha_registro = models.DateTimeField(blank=True, null=True)
+    objetivo = models.CharField(max_length=50, choices=OBJETIVO_CHOICES, blank=True, null=True)
 
     class Meta:
         managed = False
