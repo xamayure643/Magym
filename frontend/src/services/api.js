@@ -96,3 +96,81 @@ export const logoutUsuario = async (refresh) => {
         return true; 
     }
 };
+
+// --- RUTINAS ---
+export const obtenerRutinas = async () => {
+    try {
+        const response = await apiEntrenamientos.get('/rutinas/');
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Error al obtener rutinas" };
+    }
+};
+
+export const crearRutina = async (datosRutina) => {
+    // datosRutina debe ser: { nombre: "Mi Rutina", ejercicios: [ { id_ejercicio: 1, orden_ejecucion: 1 } ] }
+    try {
+        const response = await apiEntrenamientos.post('/rutinas/', datosRutina);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Error al crear rutina" };
+    }
+};
+
+export const actualizarRutina = async (idRutina, datosRutina) => {
+    try {
+        const response = await apiEntrenamientos.put(`/rutinas/${idRutina}/`, datosRutina);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Error al actualizar rutina" };
+    }
+};
+
+export const eliminarRutina = async (idRutina) => {
+    try {
+        const response = await apiEntrenamientos.delete(`/rutinas/${idRutina}/`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Error al eliminar rutina" };
+    }
+};
+
+// --- PROGRESO (Registros de Calendario) ---
+const apiProgreso = axios.create({
+    baseURL: 'http://localhost:8000/api/progreso',
+    headers: { 'Content-Type': 'application/json' }
+});
+
+apiProgreso.interceptors.request.use((config) => {
+    const token = localStorage.getItem('access');
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+});
+
+export const obtenerProgreso = async (fecha) => {
+    try {
+        const response = await apiProgreso.get(`/registros/?fecha=${fecha}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Error al cargar el progreso del día" };
+    }
+};
+
+export const obtenerTodoProgreso = async () => {
+    try {
+        const response = await apiProgreso.get('/registros/');
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Error al cargar el historial" };
+    }
+};
+
+export const guardarProgreso = async (datosProgresoArray) => {
+    try {
+        // datosProgresoArray es una lista de TODOS los ejercicios con sus series y reps
+        const response = await apiProgreso.post('/registros/', datosProgresoArray);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Error al guardar el progreso" };
+    }
+};
