@@ -55,6 +55,17 @@ export const obtenerEjercicios = async (grupoMuscular = '') => {
     }
 };
 
+// frontend/src/services/api.js
+export const obtenerFavoritos = async () => {
+    try {
+        // Quitamos el getAuthHeaders() porque el interceptor de arriba ya manda el token
+        const response = await apiEntrenamientos.get('/favoritos/');
+        return response.data; 
+    } catch (error) {
+        throw error.response?.data || { error: "Error de conexión" };
+    }
+};
+
 export const agregarFavorito = async (id_ejercicio) => {
     try {
         const response = await apiEntrenamientos.post('/favoritos/', { id_ejercicio });

@@ -7,6 +7,8 @@ class Ejercicios(models.Model):
     grupo_muscular = models.CharField(max_length=255)
     descripcion = models.TextField(blank=True, null=True)
     guia_ejecucion = models.CharField(max_length=255, blank=True, null=True)
+    imagen_url = models.CharField(max_length=255, blank=True, null=True)
+    imagen_url1 = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -33,7 +35,7 @@ class RutinasEjercicios(models.Model):
         unique_together = (('id_rutina', 'id_ejercicio'),)
 
 class UsuariosEjerciciosFavoritos(models.Model):
-    id_usuario = models.ForeignKey('usuarios.Usuarios', on_delete=models.CASCADE, db_column='id_usuario')
+    id_usuario = models.ForeignKey('usuarios.Usuarios', on_delete=models.CASCADE, db_column='id_usuario', primary_key=True)
     id_ejercicio = models.ForeignKey(Ejercicios, on_delete=models.CASCADE, db_column='id_ejercicio')
 
     class Meta:

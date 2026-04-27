@@ -40,7 +40,8 @@ class FavoritosViewSet(viewsets.ModelViewSet):
         ).first()
 
         if favorito_existente:
-             return Response({"mensaje": "El ejercicio ya está en tus favoritos"}, status=status.HTTP_200_OK)
+             favorito_existente.delete()
+             return Response({"mensaje": "Eliminado de favoritos", "accion": "eliminado"}, status=status.HTTP_200_OK)
 
         # Lo creamos manualmente para evitar conflictos con primary keys ausentes ('id')
         try:
@@ -48,6 +49,6 @@ class FavoritosViewSet(viewsets.ModelViewSet):
                 id_usuario=request.user,
                 id_ejercicio=ejercicio
             )
-            return Response({"mensaje": "Añadido a favoritos correctamente"}, status=status.HTTP_201_CREATED)
+            return Response({"mensaje": "Añadido a favoritos"}, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"error": f"Error en base de datos: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
