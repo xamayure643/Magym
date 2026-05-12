@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+
 const api = axios.create({
-    baseURL: 'http://localhost:8000/api/usuarios',
+    baseURL: `${API_BASE_URL}/usuarios`,
     headers: {
         'Content-Type': 'application/json'
     }
@@ -28,7 +30,7 @@ export const verificarCodigoSms = async (correo, codigo) => {
 
 // Instancia para el módulo de entrenamientos (con rutas limpias)
 const apiEntrenamientos = axios.create({
-    baseURL: 'http://localhost:8000/api/entrenamientos',
+    baseURL: `${API_BASE_URL}/entrenamientos`,
     headers: {
         'Content-Type': 'application/json'
     }
@@ -97,6 +99,33 @@ export const logoutUsuario = async (refresh) => {
     }
 };
 
+export const obtenerPerfil = async () => {
+    try {
+        const token = localStorage.getItem('access');
+        const response = await api.get('/perfil/', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Error al cargar perfil" };
+    }
+};
+
+export const actualizarPerfil = async (datos) => {
+    try {
+        const token = localStorage.getItem('access');
+        const response = await api.patch('/perfil/', datos, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Error al actualizar perfil" };
+    }
+};
+
+
 // --- RUTINAS ---
 export const obtenerRutinas = async () => {
     try {
@@ -137,7 +166,7 @@ export const eliminarRutina = async (idRutina) => {
 
 // --- PROGRESO (Registros de Calendario) ---
 const apiProgreso = axios.create({
-    baseURL: 'http://localhost:8000/api/progreso',
+    baseURL: `${API_BASE_URL}/progreso`,
     headers: { 'Content-Type': 'application/json' }
 });
 
@@ -172,5 +201,60 @@ export const guardarProgreso = async (datosProgresoArray) => {
         return response.data;
     } catch (error) {
         throw error.response?.data || { error: "Error al guardar el progreso" };
+    }
+};
+
+// --- NUTRICION ---
+const apiNutricion = axios.create({
+    baseURL: `${API_BASE_URL}/nutricion`,
+    headers: { 'Content-Type': 'application/json' }
+});
+
+apiNutricion.interceptors.request.use((config) => {
+    const token = localStorage.getItem('access');
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+});
+
+export const buscarAlimentos = async (query = '') => {
+    try {
+        const response = await apiNutricion.get(`/alimentos/?nombre__icontains=${query}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Error buscando alimentos" };
+    }
+};
+
+export const obtenerNutricionHoy = async (fecha) => {
+    try {
+        // Obtenemos todos los registros del día
+        const responseRegistros = await apiNutricion.get(`/registros/?fecha=${fecha}`);
+        // Obtenemos los totales del día
+        const responseTotales = await apiNutricion.get(`/registros/hoy/?fecha=${fecha}`);
+        
+        return {
+            registros: responseRegistros.data,
+            totales: responseTotales.data.totales
+        };
+    } catch (error) {
+        throw error.response?.data || { error: "Error al cargar nutrición" };
+    }
+};
+
+export const registrarAlimento = async (datosNutricion) => {
+    try {
+        const response = await apiNutricion.post('/registros/', datosNutricion);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Error al guardar el alimento" };
+    }
+};
+
+export const eliminarRegistroAlimento = async (idRegistro) => {
+    try {
+        const response = await apiNutricion.delete(`/registros/${idRegistro}/`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Error al borrar el registro" };
     }
 };

@@ -10,10 +10,10 @@ import Dashboard from './pages/Dashboard';
 // Páginas
 import Catalogo from './pages/Catalogo';
 import Login from './pages/Login';
+import Nutricion from './pages/Nutricion';
+import Perfil from './pages/Perfil';
 import { AuthProvider, AuthContext } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
-
-const Nutricion = () => <div className="p-8 text-center bg-gray-50 dark:bg-zinc-950 text-gray-500 min-h-screen font-medium transition-colors duration-300">Bajo Construcción: Nutrición</div>;
 
 const LoggedInLayout = ({ children }) => {
   const { usuario } = useContext(AuthContext);
@@ -43,6 +43,7 @@ function App() {
               <Route path="/rutinas" element={ <LoggedInLayout><Rutinas /></LoggedInLayout> } />
               <Route path="/nutricion" element={ <LoggedInLayout><Nutricion /></LoggedInLayout> } />
               <Route path="/progreso" element={ <LoggedInLayout><Progreso /></LoggedInLayout> } />
+              <Route path="/perfil" element={ <LoggedInLayout><Perfil /></LoggedInLayout> } />
             </Routes>
         </AuthProvider>
       </Router>

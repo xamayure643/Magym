@@ -71,6 +71,9 @@ const Sidebar = ({ usuario }) => {
           <Link to="/nutricion" onClick={() => setIsOpen(false)} className={`px-4 py-3 cursor-pointer rounded-lg transition-all ${enlaceActivo('/nutricion')}`}>
             Nutrición
           </Link>
+          <Link to="/perfil" onClick={() => setIsOpen(false)} className={`px-4 py-3 cursor-pointer rounded-lg transition-all ${enlaceActivo('/perfil')}`}>
+            Perfil
+          </Link>
         </nav>
 
         <div className="p-6 flex flex-col gap-3 border-t border-gray-200 dark:border-zinc-800 transition-colors">

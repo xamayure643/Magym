@@ -1,0 +1,59 @@
+services:
+  # --- BASE DE DATOS ---
+  db:
+    image: mysql:8.0
+    container_name: magym_db_container
+    restart: always
+    environment:
+      MYSQL_DATABASE: magym_db
+      MYSQL_ROOT_PASSWORD: ./Magym2026
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./init_db:/docker-entrypoint-initdb.d
+      - magym_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p./Magym2026"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  # --- BACKEND (DJANGO) ---
+  backend:
+    build: ./backend
+    container_name: magym_backend_container
+    command: python manage.py runserver 0.0.0.0:8000
+    env_file:
+      - ./.env
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=1
+      - DB_HOST=db
+      - DB_NAME=magym_db
+      - DB_USER=root
+      - DB_PASSWORD=./Magym2026
+    depends_on:
+      - db
+    restart: on-failure
+
+  # --- FRONTEND (REACT) ---
+  frontend:
+    build: ./frontend
+    container_name: magym_frontend_container
+    volumes:
+      - ./frontend:/app # <--- ESTO ES EL VOLUMEN (Actualización automática)
+      - /app/node_modules # Evita que Windows sobreescriba los módulos de Linux
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    env_file:
+      - ./.env
+
+volumes:
+  magym_db_data:
+

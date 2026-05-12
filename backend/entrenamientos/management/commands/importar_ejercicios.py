@@ -13,6 +13,7 @@ DICCIONARIO_MUSCULOS = {
     "triceps": "Tríceps", "abductors": "Abductores"
 }
 
+#Comando personalizado
 class Command(BaseCommand):
     help = 'Importa JSON de Yuhonas, con imagen 1 y 2, y traducciones al español.'
 
@@ -33,7 +34,6 @@ class Command(BaseCommand):
         traductor = GoogleTranslator(source='en', target='es')
         creados = 0
 
-        # Importaremos 250 ejercicios (Tardará 2 o 3 minutos)
         ejercicios_a_procesar = ejercicios_api[:250]
 
         self.stdout.write(f"Iniciando guardado de {len(ejercicios_a_procesar)} ejercicios...")
@@ -46,7 +46,7 @@ class Command(BaseCommand):
                 nombre_es = traductor.translate(nombre_en)
                 
                 instrucciones_en = item.get('instructions', [])
-                descripcion_es = traductor.translate(" ".join(instrucciones_en)) if instrucciones_en else "Sin descripción oficial."
+                descripcion_es = traductor.translate(" ".join(instrucciones_en)) if instrucciones_en else "Sin descripción."
 
                 lista_musculos = []
                 for m in item.get('primaryMuscles', []) + item.get('secondaryMuscles', []):

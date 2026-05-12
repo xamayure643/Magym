@@ -6,9 +6,10 @@ from django.contrib.auth.hashers import check_password
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.cache import cache
 
-from .serializers import RegistroUsuarioSerializer
+from .serializers import RegistroUsuarioSerializer, PerfilUsuarioSerializer
 from .services import enviar_sms_verificacion
 from .models import Usuarios
+
 
 
 class RegistroUsuarioView(APIView):
@@ -162,3 +163,20 @@ class LogoutView(APIView):
             return Response({"mensaje": "Logout exitoso. Token invalidado."}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": f"Error al hacer logout: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+        
+class PerfilUsuarioView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        usuario = request.user
+        serializer = PerfilUsuarioSerializer(usuario)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        
+    def patch(self, request):
+        usuario = request.user
+        # partial=True permite actualizar selectivamente solo los campos enviados (ej. solo el peso)
+        serializer = PerfilUsuarioSerializer(usuario, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
