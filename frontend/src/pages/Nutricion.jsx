@@ -268,22 +268,22 @@ const Nutricion = () => {
                     </ul>
                 )}
             </div>
-        </div>
 
-        {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
-        <ConfirmationModal
-            isOpen={confirmacionAbierta}
-            titulo="Eliminar Alimento"
-            mensaje="¿Estás seguro de que quieres eliminar este registro? Esta acción no se puede deshacer."
-            textoConfirmar="Eliminar"
-            textoCancel="Cancelar"
-            onConfirm={confirmarEliminacion}
-            onCancel={() => {
-                setConfirmacionAbierta(false);
-                setRegistroAEliminar(null);
-            }}
-            isDangerous={true}
-        />
+            {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
+            <ConfirmationModal
+                isOpen={confirmacionAbierta}
+                titulo="Eliminar Alimento"
+                mensaje="¿Estás seguro de que quieres eliminar este registro? Esta acción no se puede deshacer."
+                textoConfirmar="Eliminar"
+                textoCancel="Cancelar"
+                onConfirm={confirmarEliminacion}
+                onCancel={() => {
+                    setConfirmacionAbierta(false);
+                    setRegistroAEliminar(null);
+                }}
+                isDangerous={true}
+            />
+        </div>
     );
 };
 
