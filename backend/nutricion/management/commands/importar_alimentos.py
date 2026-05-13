@@ -66,6 +66,9 @@ class Command(BaseCommand):
                 calorias_100g = producto.get('nutriments', {}).get('energy-kcal_100g')
                 proteinas_100g = producto.get('nutriments', {}).get('proteins_100g')
 
+                if calorias_100g is None or proteinas_100g is None:
+                    continue
+
 
                 calorias_por_gramo = float(calorias_100g) / 100
                 proteinas_por_gramo = float(proteinas_100g) / 100
