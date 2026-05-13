@@ -58,11 +58,7 @@ const Dashboard = () => {
           Tus Estadísticas
         </h1>
 
-        <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 rounded-2xl shadow-xl mb-8 grid grid-cols-1 md:grid-cols-3 gap-6 transition-colors">
-          <div>
-            <label className="block text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider mb-2">1. Elige una Rutina</label>
-            <select 
-              value={rutinaElegida} onChange={e => setRutinaElegida(e.target.value)}2 gap-6 transition-colors">
+        <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 rounded-2xl shadow-xl mb-8 grid grid-cols-1 md:grid-cols-2 gap-6 transition-colors">
           <div>
             <label className="block text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider mb-2">1. Elige una Rutina</label>
             <select 
@@ -85,6 +81,10 @@ const Dashboard = () => {
               {ejerciciosDisponibles.map(ej => (
                 <option key={ej.id_ejercicio} value={ej.id_ejercicio}>{ej.nombre}</option>
               ))}
+            </select>
+          </div>
+        </div>
+
         <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 md:p-8 rounded-2xl shadow-xl transition-colors">
           {!rutinaElegida || !ejercicioElegido ? (
             <div className="h-64 flex flex-col items-center justify-center text-gray-400 dark:text-zinc-500 space-y-2">
