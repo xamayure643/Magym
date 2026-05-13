@@ -133,6 +133,8 @@ const Catalogo = () => {
   const [vistaActual, setVistaActual] = useState('todos'); // 'todos' o 'favoritos'
   const [textoBusqueda, setTextoBusqueda] = useState('');
   const [musculosSeleccionados, setMusculosSeleccionados] = useState([]);
+  const [paginaActual, setPaginaActual] = useState(1);
+  const ejerciciosPorPagina = 8;
 
   useEffect(() => {
     let unmounted = false;
@@ -186,6 +188,11 @@ const Catalogo = () => {
 
   const cerrarToast = () => setMensaje(null);
 
+  // Resetear página cuando cambian filtros
+  useEffect(() => {
+    setPaginaActual(1); // eslint-disable-line react-hooks/exhaustive-deps, no-use-before-define
+  }, [textoBusqueda, musculosSeleccionados, vistaActual]);
+
   const handleAñadirFiltroMusculo = (e) => {
     const musculo = e.target.value;
     if (musculo && !musculosSeleccionados.includes(musculo)) {
@@ -201,6 +208,7 @@ const Catalogo = () => {
   const handleLimpiarFiltros = () => {
       setTextoBusqueda('');
       setMusculosSeleccionados([]);
+      setPaginaActual(1);
   };
 
   // Lógica de filtrado en cliente
@@ -308,8 +316,9 @@ const Catalogo = () => {
             <p className="text-gray-500 dark:text-zinc-400 font-medium text-lg">No se encontraron ejercicios con los filtros actuales.</p>
           </div>
         ) : (
+          <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {ejerciciosFiltrados.map((ej) => (
+            {ejerciciosFiltrados.slice((paginaActual - 1) * ejerciciosPorPagina, paginaActual * ejerciciosPorPagina).map((ej) => (
               <TarjetaEjercicio 
                 key={ej.id_ejercicio} 
                 ejercicio={ej} 
@@ -318,6 +327,40 @@ const Catalogo = () => {
               />
             ))}
           </div>
+
+          {/* PAGINACIÓN */}
+          {Math.ceil(ejerciciosFiltrados.length / ejerciciosPorPagina) > 1 && (
+            <div className="mt-10 flex justify-center gap-2 flex-wrap">
+              <button
+                onClick={() => setPaginaActual(prev => Math.max(prev - 1, 1))}
+                disabled={paginaActual === 1}
+                className="px-4 py-2 bg-gray-100 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors font-medium"
+              >
+                ← Anterior
+              </button>
+              {Array.from({ length: Math.ceil(ejerciciosFiltrados.length / ejerciciosPorPagina) }, (_, i) => i + 1).map(num => (
+                <button
+                  key={num}
+                  onClick={() => setPaginaActual(num)}
+                  className={`px-3 py-2 rounded-lg transition-colors font-medium ${
+                    paginaActual === num
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-zinc-700'
+                  }`}
+                >
+                  {num}
+                </button>
+              ))}
+              <button
+                onClick={() => setPaginaActual(prev => Math.min(prev + 1, Math.ceil(ejerciciosFiltrados.length / ejerciciosPorPagina)))}
+                disabled={paginaActual === Math.ceil(ejerciciosFiltrados.length / ejerciciosPorPagina)}
+                className="px-4 py-2 bg-gray-100 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors font-medium"
+              >
+                Siguiente →
+              </button>
+            </div>
+          )}
+          </>
         )}
       </div>
     </div>
