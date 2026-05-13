@@ -338,19 +338,32 @@ const Catalogo = () => {
               >
                 ← Anterior
               </button>
-              {Array.from({ length: Math.ceil(ejerciciosFiltrados.length / ejerciciosPorPagina) }, (_, i) => i + 1).map(num => (
-                <button
-                  key={num}
-                  onClick={() => setPaginaActual(num)}
-                  className={`px-3 py-2 rounded-lg transition-colors font-medium ${
-                    paginaActual === num
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-zinc-700'
-                  }`}
-                >
-                  {num}
-                </button>
-              ))}
+              
+              {/* Mostrar 5 páginas a la vez */}
+              {Array.from(
+                { length: Math.ceil(ejerciciosFiltrados.length / ejerciciosPorPagina) },
+                (_, i) => i + 1
+              )
+                .filter(num => {
+                  const totalPaginas = Math.ceil(ejerciciosFiltrados.length / ejerciciosPorPagina);
+                  const inicio = Math.max(1, paginaActual - 2);
+                  const fin = Math.min(totalPaginas, paginaActual + 2);
+                  return num >= inicio && num <= fin;
+                })
+                .map(num => (
+                  <button
+                    key={num}
+                    onClick={() => setPaginaActual(num)}
+                    className={`px-3 py-2 rounded-lg transition-colors font-medium ${
+                      paginaActual === num
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-zinc-700'
+                    }`}
+                  >
+                    {num}
+                  </button>
+                ))}
+              
               <button
                 onClick={() => setPaginaActual(prev => Math.min(prev + 1, Math.ceil(ejerciciosFiltrados.length / ejerciciosPorPagina)))}
                 disabled={paginaActual === Math.ceil(ejerciciosFiltrados.length / ejerciciosPorPagina)}
