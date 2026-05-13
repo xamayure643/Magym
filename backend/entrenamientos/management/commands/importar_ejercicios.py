@@ -1,9 +1,10 @@
-import requests
-import time
-from deep_translator import GoogleTranslator
-from django.core.management.base import BaseCommand
+import requests #Peticiones API
+import time #Para los sleep
+from deep_translator import GoogleTranslator #Librería para traducir
+from django.core.management.base import BaseCommand #Para crear comandos personalizados
 from entrenamientos.models import Ejercicios
 
+#Mapa para las traducciones de las categorías
 DICCIONARIO_MUSCULOS = {
     "abdominal": "Abdominales", "adductors": "Aductores", "obliques": "Oblicuos",
     "biceps": "Bíceps", "calves": "Gemelos", "chest": "Pecho", "forearms": "Antebrazos",
@@ -13,20 +14,22 @@ DICCIONARIO_MUSCULOS = {
     "triceps": "Tríceps", "abductors": "Abductores"
 }
 
-#Comando personalizado
 class Command(BaseCommand):
-    help = 'Importa JSON de Yuhonas, con imagen 1 y 2, y traducciones al español.'
+    help = 'Puebla la tabla de ejercicios'
 
     def handle(self, *args, **kwargs):
-        self.stdout.write(self.style.WARNING("Descargando JSON de Yuhonas..."))
-        
+        self.stdout.write(self.style.WARNING("Descargando JSON de ejercicios..."))
+
+        #Ejercicios
         url_json = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json"
+
+        #Fotos de ejercicios
         base_url_img = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/"
         
         try:
-            r = requests.get(url_json, timeout=15)
-            r.raise_for_status()
-            ejercicios_api = r.json()
+            r = requests.get(url_json, timeout=15) #Descargamos el JSON
+            r.raise_for_status() #Si no da 200 lanza error
+            ejercicios_api = r.json() #Cogemos la lista de ejercicios
         except Exception as e:
             self.stdout.write(self.style.ERROR(f"Error JSON: {e}"))
             return
@@ -57,7 +60,6 @@ class Command(BaseCommand):
                 musculos_unicos = list(dict.fromkeys([m for m in lista_musculos if m]))
                 grupo_muscular_unido = ", ".join(musculos_unicos) if musculos_unicos else "General"
 
-                # Obtener la imagen inicial y la final (0.jpg y 1.jpg)
                 imagen_url = ""
                 imagen_url1 = ""
                 imagenes = item.get('images', [])
@@ -70,8 +72,7 @@ class Command(BaseCommand):
                 nombre_url = nombre_es.replace(" ", "+")
                 guia_ejecucion = f"https://www.youtube.com/results?search_query={nombre_url}+ejercicio+gimnasio"
 
-                # Guardado final
-                ejercicio, created = Ejercicios.objects.get_or_create(
+                ejercicio, created = Ejercicios.objects.get_or_create( 
                     nombre=nombre_es[:100], 
                     defaults={
                         'grupo_muscular': grupo_muscular_unido[:255], 
@@ -92,4 +93,4 @@ class Command(BaseCommand):
             except Exception as e:
                 self.stdout.write(self.style.ERROR(f"Ignorando error en '{nombre_en}': {e}"))
 
-        self.stdout.write(self.style.SUCCESS(f"¡Listo! Se crearon {creados} ejercicios de oro con FOTOS e instrucciones en español."))
+        self.stdout.write(self.style.SUCCESS(f"¡Listo! Se crearon {creados} ejercicios con imágenes e instrucciones en español."))

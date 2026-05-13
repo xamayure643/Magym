@@ -8,7 +8,7 @@ services:
       MYSQL_DATABASE: magym_db
       MYSQL_ROOT_PASSWORD: ./Magym2026
     ports:
-      - "3307:3306"
+      - "3308:3306"
     volumes:
       - ./init_db:/docker-entrypoint-initdb.d
       - magym_db_data:/var/lib/mysql
@@ -29,7 +29,7 @@ services:
     volumes:
       - ./backend:/app
     ports:
-      - "8000:8000"
+      - "8002:8000"
     environment:
       - DEBUG=1
       - DB_HOST=db
@@ -48,7 +48,7 @@ services:
       - ./frontend:/app # <--- ESTO ES EL VOLUMEN (Actualización automática)
       - /app/node_modules # Evita que Windows sobreescriba los módulos de Linux
     ports:
-      - "5173:5173"
+      - "3001:80"
     depends_on:
       - backend
     env_file:

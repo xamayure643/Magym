@@ -24,11 +24,12 @@ class RutinaSerializer(serializers.ModelSerializer):
 
     def get_ejercicios(self, obj):
         pivotes = RutinasEjercicios.objects.filter(id_rutina=obj).order_by('orden_ejecucion')
-        return [
-            {
-                "id_ejercicio": p.id_ejercicio.id_ejercicio,
-                "nombre": p.id_ejercicio.nombre,
-                "imagen_url": p.id_ejercicio.imagen_url,
-                "orden_ejecucion": p.orden_ejecucion,
-            } for p in pivotes
-        ]
+        resultado = []
+        for p in pivotes:
+                resultado.append({
+                    "id_ejercicio": p.id_ejercicio.id_ejercicio,
+                    "nombre": p.id_ejercicio.nombre,
+                    "imagen_url": p.id_ejercicio.imagen_url,
+                    "orden_ejecucion": p.orden_ejecucion,
+                })
+        return resultado

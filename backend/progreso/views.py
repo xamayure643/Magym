@@ -54,6 +54,6 @@ class RegistrosProgresoViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
             
         except Ejercicios.DoesNotExist:
-             return Response({"error": "Ejercicio no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Ejercicio no encontrado"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

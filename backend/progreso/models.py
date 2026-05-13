@@ -1,6 +1,5 @@
 from django.db import models
 
-# Create your models here.
 class RegistrosProgreso(models.Model):
     id_progreso = models.AutoField(primary_key=True)
     id_usuario = models.ForeignKey('usuarios.Usuarios', on_delete=models.CASCADE, db_column='id_usuario')
