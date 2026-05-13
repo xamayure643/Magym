@@ -47,7 +47,7 @@ services:
     volumes:
       - ./frontend:/app # <--- ESTO ES EL VOLUMEN (Actualización automática)
       - /app/node_modules # Evita que Windows sobreescriba los módulos de Linux
-    command: npm run dev -- --host 0.0.0.0 --disableHostCheck
+    command: npm run dev -- --host 0.0.0.0
     ports:
       - "3001:5173"
     depends_on:
