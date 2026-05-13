@@ -42,15 +42,9 @@ const Dashboard = () => {
       const hoy = dayjs();
       
       if (filtroTiempo === 'mes') {
-        datosFiltrados = datosFiltrados.filter(h => {
-          const fecha = dayjs(h.fecha);
-          return fecha.isValid() && fecha.isSameOrAfter(hoy.subtract(1, 'month'));
-        });
+        datosFiltrados = datosFiltrados.filter(h => dayjs(h.fecha).isSameOrAfter(hoy.subtract(1, 'month')));
       } else if (filtroTiempo === 'anyo') {
-        datosFiltrados = datosFiltrados.filter(h => {
-          const fecha = dayjs(h.fecha);
-          return fecha.isValid() && fecha.isSameOrAfter(hoy.subtract(1, 'year'));
-        });
+        datosFiltrados = datosFiltrados.filter(h => dayjs(h.fecha).isSameOrAfter(hoy.subtract(1, 'year')));
       }
 
       datosFiltrados.sort((a, b) => dayjs(a.fecha).diff(dayjs(b.fecha)));
