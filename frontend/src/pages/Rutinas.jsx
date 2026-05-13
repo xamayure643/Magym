@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { obtenerRutinas, crearRutina, actualizarRutina, eliminarRutina, obtenerEjercicios } from '../services/api';
+import ConfirmationModal from '../components/ConfirmationModal';
 
 const Rutinas = () => {
   const [rutinas, setRutinas] = useState([]);
@@ -10,6 +11,10 @@ const Rutinas = () => {
   const [rutinaEditando, setRutinaEditando] = useState(null);
   const [nombreRutina, setNombreRutina] = useState('');
   const [busqueda, setBusqueda] = useState('');
+  
+  // Estados para el modal de confirmación
+  const [confirmacionAbierta, setConfirmacionAbierta] = useState(false);
+  const [rutinaAEliminar, setRutinaAEliminar] = useState(null);
   
   // Ejercicios
   const [ejerciciosDisponibles, setEjerciciosDisponibles] = useState([]);
@@ -43,10 +48,16 @@ const Rutinas = () => {
 
   // --- ACTIONS: Rutinas ---
   const handleEliminar = async (idRutina) => {
-    if (!window.confirm("¿Seguro que quieres eliminar esta rutina?")) return;
+    setRutinaAEliminar(idRutina);
+    setConfirmacionAbierta(true);
+  };
+
+  const confirmarEliminacion = async () => {
     try {
-      await eliminarRutina(idRutina);
-      setRutinas(prev => prev.filter(r => r.id_rutina !== idRutina));
+      await eliminarRutina(rutinaAEliminar);
+      setRutinas(prev => prev.filter(r => r.id_rutina !== rutinaAEliminar));
+      setConfirmacionAbierta(false);
+      setRutinaAEliminar(null);
     } catch { 
       alert("Error al eliminar"); 
     }
@@ -280,6 +291,21 @@ const Rutinas = () => {
           </div>
         </div>
       )}
+
+      {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
+      <ConfirmationModal
+        isOpen={confirmacionAbierta}
+        titulo="Eliminar Rutina"
+        mensaje="¿Estás seguro de que quieres eliminar esta rutina? Esta acción no se puede deshacer."
+        textoConfirmar="Eliminar"
+        textoCancel="Cancelar"
+        onConfirm={confirmarEliminacion}
+        onCancel={() => {
+          setConfirmacionAbierta(false);
+          setRutinaAEliminar(null);
+        }}
+        isDangerous={true}
+      />
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { buscarAlimentos, obtenerNutricionHoy, eliminarRegistroAlimento, registrarAlimento, obtenerPerfil } from '../services/api';
 import { calcularMetas } from '../utils/calculos';
+import ConfirmationModal from '../components/ConfirmationModal';
 
 const Nutricion = () => {
     const todayStr = new Date().toISOString().split('T')[0];
@@ -16,6 +17,10 @@ const Nutricion = () => {
     const [totales, setTotales] = useState({ calorias: 0, proteinas: 0 });
     const [cargando, setCargando] = useState(false);
     const [error, setError] = useState('');
+
+    // Estados para modal de confirmación
+    const [confirmacionAbierta, setConfirmacionAbierta] = useState(false);
+    const [registroAEliminar, setRegistroAEliminar] = useState(null);
 
     // FUNCIÓN PRINCIPAL DE CARGA (Sin useCallback, se controla en el useEffect)
     const cargarDatosDelDia = async () => {
@@ -96,12 +101,21 @@ const Nutricion = () => {
         }
     };
 
-    const borrarRegistro = async (idRegistro) => {
+    const borrarRegistro = (idRegistro) => {
+        setRegistroAEliminar(idRegistro);
+        setConfirmacionAbierta(true);
+    };
+
+    const confirmarEliminacion = async () => {
         try {
-            await eliminarRegistroAlimento(idRegistro);
-            cargarDatosDelDia(); // Refresca tras borrar
+            await eliminarRegistroAlimento(registroAEliminar);
+            cargarDatosDelDia();
+            setConfirmacionAbierta(false);
+            setRegistroAEliminar(null);
         } catch (err) {
             setError(err.error || 'Error al eliminar el alimento');
+            setConfirmacionAbierta(false);
+            setRegistroAEliminar(null);
         }
     };
 
@@ -255,6 +269,21 @@ const Nutricion = () => {
                 )}
             </div>
         </div>
+
+        {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
+        <ConfirmationModal
+            isOpen={confirmacionAbierta}
+            titulo="Eliminar Alimento"
+            mensaje="¿Estás seguro de que quieres eliminar este registro? Esta acción no se puede deshacer."
+            textoConfirmar="Eliminar"
+            textoCancel="Cancelar"
+            onConfirm={confirmarEliminacion}
+            onCancel={() => {
+                setConfirmacionAbierta(false);
+                setRegistroAEliminar(null);
+            }}
+            isDangerous={true}
+        />
     );
 };
 
