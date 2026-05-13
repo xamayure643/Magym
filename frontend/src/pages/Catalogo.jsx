@@ -330,7 +330,7 @@ const Catalogo = () => {
 
           {/* PAGINACIÓN */}
           {Math.ceil(ejerciciosFiltrados.length / ejerciciosPorPagina) > 1 && (
-            <div className="mt-10 flex justify-center gap-2 flex-wrap">
+            <div className="mt-10 flex justify-center gap-2 flex-wrap items-center">
               <button
                 onClick={() => setPaginaActual(prev => Math.max(prev - 1, 1))}
                 disabled={paginaActual === 1}
@@ -339,15 +339,29 @@ const Catalogo = () => {
                 ← Anterior
               </button>
               
-              {/* Mostrar 5 páginas a la vez */}
+              {/* Mostrar siempre 5 páginas */}
               {Array.from(
                 { length: Math.ceil(ejerciciosFiltrados.length / ejerciciosPorPagina) },
                 (_, i) => i + 1
               )
                 .filter(num => {
                   const totalPaginas = Math.ceil(ejerciciosFiltrados.length / ejerciciosPorPagina);
-                  const inicio = Math.max(1, paginaActual - 2);
-                  const fin = Math.min(totalPaginas, paginaActual + 2);
+                  let inicio, fin;
+                  
+                  if (totalPaginas <= 5) {
+                    inicio = 1;
+                    fin = totalPaginas;
+                  } else if (paginaActual <= 3) {
+                    inicio = 1;
+                    fin = 5;
+                  } else if (paginaActual >= totalPaginas - 2) {
+                    inicio = totalPaginas - 4;
+                    fin = totalPaginas;
+                  } else {
+                    inicio = paginaActual - 2;
+                    fin = paginaActual + 2;
+                  }
+                  
                   return num >= inicio && num <= fin;
                 })
                 .map(num => (
