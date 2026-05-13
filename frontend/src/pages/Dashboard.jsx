@@ -36,22 +36,36 @@ const Dashboard = () => {
   useEffect(() => setEjercicioElegido(''), [rutinaElegida]);
 
   const datosGrafica = useMemo(() => {
-    if (!ejercicioElegido) return [];
-    let datosFiltrados = historial.filter(h => h.id_ejercicio === Number(ejercicioElegido));
-    const hoy = dayjs();
-    
-    if (filtroTiempo === 'mes') datosFiltrados = datosFiltrados.filter(h => dayjs(h.fecha).isSameOrAfter(hoy.subtract(1, 'month')));
-    else if (filtroTiempo === 'anyo') datosFiltrados = datosFiltrados.filter(h => dayjs(h.fecha).isSameOrAfter(hoy.subtract(1, 'year')));
-
-    datosFiltrados.sort((a, b) => dayjs(a.fecha).diff(dayjs(b.fecha)));
-
-    return datosFiltrados.map(registro => {
-      let pesoMaximo = 0;
-      if (registro.detalles_series && registro.detalles_series.length > 0) {
-        pesoMaximo = Math.max(...registro.detalles_series.map(s => Number(s.peso) || 0));
+    try {
+      if (!ejercicioElegido) return [];
+      let datosFiltrados = historial.filter(h => h.id_ejercicio === Number(ejercicioElegido));
+      const hoy = dayjs();
+      
+      if (filtroTiempo === 'mes') {
+        datosFiltrados = datosFiltrados.filter(h => {
+          const fecha = dayjs(h.fecha);
+          return fecha.isValid() && fecha.isSameOrAfter(hoy.subtract(1, 'month'));
+        });
+      } else if (filtroTiempo === 'anyo') {
+        datosFiltrados = datosFiltrados.filter(h => {
+          const fecha = dayjs(h.fecha);
+          return fecha.isValid() && fecha.isSameOrAfter(hoy.subtract(1, 'year'));
+        });
       }
-      return { fecha: dayjs(registro.fecha).format('DD/MM/YYYY'), pesoM: pesoMaximo };
-    });
+
+      datosFiltrados.sort((a, b) => dayjs(a.fecha).diff(dayjs(b.fecha)));
+
+      return datosFiltrados.map(registro => {
+        let pesoMaximo = 0;
+        if (registro.detalles_series && registro.detalles_series.length > 0) {
+          pesoMaximo = Math.max(...registro.detalles_series.map(s => Number(s.peso) || 0));
+        }
+        return { fecha: dayjs(registro.fecha).format('DD/MM/YYYY'), pesoM: pesoMaximo };
+      });
+    } catch (error) {
+      console.error("Error en datosGrafica:", error);
+      return [];
+    }
   }, [ejercicioElegido, historial, filtroTiempo]);
 
   if (cargando) return <div className="p-8 text-center text-gray-500 font-medium">Cargando métricas...</div>;
