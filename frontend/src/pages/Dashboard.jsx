@@ -10,7 +10,6 @@ const Dashboard = () => {
 
   const [rutinaElegida, setRutinaElegida] = useState('');
   const [ejercicioElegido, setEjercicioElegido] = useState('');
-  const [filtroTiempo, setFiltroTiempo] = useState('siempre');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,31 +35,19 @@ const Dashboard = () => {
   useEffect(() => setEjercicioElegido(''), [rutinaElegida]);
 
   const datosGrafica = useMemo(() => {
-    try {
-      if (!ejercicioElegido) return [];
-      let datosFiltrados = historial.filter(h => h.id_ejercicio === Number(ejercicioElegido));
-      const hoy = dayjs();
-      
-      if (filtroTiempo === 'mes') {
-        datosFiltrados = datosFiltrados.filter(h => dayjs(h.fecha).isSameOrAfter(hoy.subtract(1, 'month')));
-      } else if (filtroTiempo === 'anyo') {
-        datosFiltrados = datosFiltrados.filter(h => dayjs(h.fecha).isSameOrAfter(hoy.subtract(1, 'year')));
+    if (!ejercicioElegido) return [];
+    let datosFiltrados = historial.filter(h => h.id_ejercicio === Number(ejercicioElegido));
+
+    datosFiltrados.sort((a, b) => dayjs(a.fecha).diff(dayjs(b.fecha)));
+
+    return datosFiltrados.map(registro => {
+      let pesoMaximo = 0;
+      if (registro.detalles_series && registro.detalles_series.length > 0) {
+        pesoMaximo = Math.max(...registro.detalles_series.map(s => Number(s.peso) || 0));
       }
-
-      datosFiltrados.sort((a, b) => dayjs(a.fecha).diff(dayjs(b.fecha)));
-
-      return datosFiltrados.map(registro => {
-        let pesoMaximo = 0;
-        if (registro.detalles_series && registro.detalles_series.length > 0) {
-          pesoMaximo = Math.max(...registro.detalles_series.map(s => Number(s.peso) || 0));
-        }
-        return { fecha: dayjs(registro.fecha).format('DD/MM/YYYY'), pesoM: pesoMaximo };
-      });
-    } catch (error) {
-      console.error("Error en datosGrafica:", error);
-      return [];
-    }
-  }, [ejercicioElegido, historial, filtroTiempo]);
+      return { fecha: dayjs(registro.fecha).format('DD/MM/YYYY'), pesoM: pesoMaximo };
+    });
+  }, [ejercicioElegido, historial]);
 
   if (cargando) return <div className="p-8 text-center text-gray-500 font-medium">Cargando métricas...</div>;
 
@@ -72,6 +59,10 @@ const Dashboard = () => {
         </h1>
 
         <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 rounded-2xl shadow-xl mb-8 grid grid-cols-1 md:grid-cols-3 gap-6 transition-colors">
+          <div>
+            <label className="block text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider mb-2">1. Elige una Rutina</label>
+            <select 
+              value={rutinaElegida} onChange={e => setRutinaElegida(e.target.value)}2 gap-6 transition-colors">
           <div>
             <label className="block text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider mb-2">1. Elige una Rutina</label>
             <select 
@@ -94,21 +85,6 @@ const Dashboard = () => {
               {ejerciciosDisponibles.map(ej => (
                 <option key={ej.id_ejercicio} value={ej.id_ejercicio}>{ej.nombre}</option>
               ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider mb-2">3. Rango de Tiempo</label>
-            <select 
-              value={filtroTiempo} onChange={e => setFiltroTiempo(e.target.value)}
-              className="w-full p-3 bg-gray-50 dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 text-gray-900 dark:text-zinc-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-            >
-              <option value="mes">Último Mes</option>
-              <option value="anyo">Último Año</option>
-              <option value="siempre">Desde el principio</option>
-            </select>
-          </div>
-        </div>
-
         <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 md:p-8 rounded-2xl shadow-xl transition-colors">
           {!rutinaElegida || !ejercicioElegido ? (
             <div className="h-64 flex flex-col items-center justify-center text-gray-400 dark:text-zinc-500 space-y-2">
