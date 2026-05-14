@@ -5,6 +5,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.hashers import check_password
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.cache import cache
+from django.db import transaction
 
 from .serializers import RegistroUsuarioSerializer, PerfilUsuarioSerializer
 from .services import enviar_sms_verificacion
@@ -19,28 +20,34 @@ class RegistroUsuarioView(APIView):
         serializer = RegistroUsuarioSerializer(data=request.data)
         
         if serializer.is_valid():
-            # 1. GUARDAMOS en BD directamente (quedará 'cuenta_activa = False' por el serializer)
-            usuario = serializer.save()
-            
             telefono_real = request.data.get('telefono')
             correo = request.data.get('correo') 
 
-            # 2. Generamos y enviamos el SMS
-            codigo_generado = enviar_sms_verificacion(telefono_real)
-            
-            if codigo_generado:
-                # 3. Guardamos SOLO el código en la caché
-                cache.set(f"codigo_verificacion_{correo}", codigo_generado, timeout=300) # 5 minutos
-                
+            # Usamos una transacción para asegurarnos de que SI FALLA el envío del SMS
+            # no se guarde el usuario en la base de datos.
+            try:
+                with transaction.atomic():
+                    # 1. Guardamos en BD (cuenta_activa = False por el serializer)
+                    usuario = serializer.save()
+
+                    # 2. Generamos y enviamos el SMS
+                    codigo_generado = enviar_sms_verificacion(telefono_real)
+
+                    if not codigo_generado:
+                        # Lanzamos excepción para hacer rollback y no dejar usuario creado
+                        raise RuntimeError("Fallo al enviar SMS de verificación")
+
+                    # 3. Guardamos SOLO el código en la caché
+                    cache.set(f"codigo_verificacion_{correo}", codigo_generado, timeout=300) # 5 minutos
+
+                # Si llegamos aquí, todo fue bien y la transacción se commit
                 return Response(
                     {"mensaje": "Usuario creado (inactivo). SMS enviado. Esperando verificación.", "correo": correo}, 
                     status=status.HTTP_201_CREATED
                 )
-            else:
-                return Response(
-                    {"error": "Error al enviar el SMS. Tu cuenta ha sido creada, pero requiere verificación."}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+            except Exception as e:
+                # No se creó el usuario por error en el envío del SMS u otro fallo
+                return Response({"error": "Error al crear usuario: no se ha guardado. " + str(e)}, status=status.HTTP_400_BAD_REQUEST)
             
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -111,7 +118,6 @@ class LoginUsuarioView(APIView):
         except Usuarios.DoesNotExist:
             return Response({"error": "Credenciales inválidas"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        # VALIDACIÓN EXTRA: Bloqueamos si la cuenta no ha sido verificada por SMS
         if not usuario.cuenta_activa:
             return Response({
                 "error": "Tu cuenta aún no está verificada. Por favor, verifica el código SMS."
@@ -119,7 +125,6 @@ class LoginUsuarioView(APIView):
 
         if check_password(contrasena_recibida, usuario.contrasena):
             refresh = RefreshToken()
-            # ¡CORREGIDO! De usuario_id a user_id
             refresh['user_id'] = usuario.id_usuario
             refresh['nombre'] = usuario.nombre
             refresh['correo'] = usuario.correo
