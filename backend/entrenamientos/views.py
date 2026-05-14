@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.db import transaction
 from .models import Ejercicios, UsuariosEjerciciosFavoritos, Rutinas, RutinasEjercicios
 from .serializers import EjercicioSerializer, UsuariosEjerciciosFavoritosSerializer, RutinaSerializer
+from django.shortcuts import get_object_or_404
 
 class EjerciciosViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ejercicios.objects.all()
@@ -25,34 +26,18 @@ class FavoritosViewSet(viewsets.ModelViewSet):
 
     def create(self, request):
         id_ejercicio = request.data.get('id_ejercicio')
-        
-        if not id_ejercicio:
-            return Response({"error": "Debes proveer un id_ejercicio"}, status=status.HTTP_400_BAD_REQUEST)
-        
-        try:
-            ejercicio = Ejercicios.objects.get(id_ejercicio=id_ejercicio)
-        except Ejercicios.DoesNotExist:
-            return Response({"error": "El ejercicio no existe"}, status=status.HTTP_404_NOT_FOUND)
+        ejercicio = get_object_or_404(Ejercicios, id_ejercicio=id_ejercicio) # Uso de helper
 
-        #Comprobamos que exista para no intentar añadirlo de nuevo
-        favorito_existente = UsuariosEjerciciosFavoritos.objects.filter(
+        favorito, created = UsuariosEjerciciosFavoritos.objects.get_or_create(
             id_usuario=request.user,
             id_ejercicio=ejercicio
-        ).first()
+        )
 
-        #Si existia, se borra
-        if favorito_existente:
-            favorito_existente.delete()
+        if not created:
+            favorito.delete()
             return Response({"mensaje": "Eliminado de favoritos", "accion": "eliminado"}, status=status.HTTP_200_OK)
 
-        try:
-            UsuariosEjerciciosFavoritos.objects.create(
-                id_usuario=request.user,
-                id_ejercicio=ejercicio
-            )
-            return Response({"mensaje": "Añadido a favoritos"}, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            return Response({"error": f"Error en base de datos: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"mensaje": "Añadido a favoritos"}, status=status.HTTP_201_CREATED)
         
 class RutinasViewSet(viewsets.ModelViewSet):
     serializer_class = RutinaSerializer
@@ -117,9 +102,5 @@ class RutinasViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         rutina = self.get_object()
-        try:
-            RutinasEjercicios.objects.filter(id_rutina=rutina).delete()
-            rutina.delete()
-            return Response({"mensaje": "Rutina eliminada"}, status=status.HTTP_204_NO_CONTENT)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        rutina.delete() # El CASCADE de la BD ya limpia RutinasEjercicios
+        return Response({"mensaje": "Rutina eliminada"}, status=status.HTTP_204_NO_CONTENT)

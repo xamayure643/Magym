@@ -1,3 +1,5 @@
+from operator import add
+
 from django.db import models
 
 class Ejercicios(models.Model):
@@ -17,14 +19,14 @@ class Rutinas(models.Model):
     id_rutina = models.AutoField(primary_key=True)
     id_usuario = models.ForeignKey('usuarios.Usuarios', on_delete=models.CASCADE, db_column='id_usuario')
     nombre = models.CharField(max_length=100)
-    fecha_creacion = models.DateTimeField(blank=True, null=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         managed = False
         db_table = 'rutinas'
 
 class RutinasEjercicios(models.Model):
-    id_rutina = models.ForeignKey(Rutinas, on_delete=models.CASCADE, db_column='id_rutina', primary_key=True)
+    id_rutina = models.ForeignKey(Rutinas, on_delete=models.CASCADE, db_column='id_rutina')
     id_ejercicio = models.ForeignKey(Ejercicios, on_delete=models.CASCADE, db_column='id_ejercicio')
     orden_ejecucion = models.IntegerField()
 
@@ -34,7 +36,7 @@ class RutinasEjercicios(models.Model):
         unique_together = (('id_rutina', 'id_ejercicio'),) #Evitamos duplicados en la misma rutina
 
 class UsuariosEjerciciosFavoritos(models.Model):
-    id_usuario = models.ForeignKey('usuarios.Usuarios', on_delete=models.CASCADE, db_column='id_usuario', primary_key=True)
+    id_usuario = models.ForeignKey('usuarios.Usuarios', on_delete=models.CASCADE, db_column='id_usuario')
     id_ejercicio = models.ForeignKey(Ejercicios, on_delete=models.CASCADE, db_column='id_ejercicio')
 
     class Meta:
