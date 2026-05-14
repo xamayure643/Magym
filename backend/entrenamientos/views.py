@@ -42,13 +42,11 @@ class FavoritosViewSet(viewsets.ModelViewSet):
 
         #Si existia, se borra
         if favorito_existente:
-            # Eliminamos por filtro explícito asegurando que sólo se borren filas
-            # donde coincidan usuario y ejercicio (usa la columna FK correcta)
-            deleted_count, _ = UsuariosEjerciciosFavoritos.objects.filter(
+            borrado, _ = UsuariosEjerciciosFavoritos.objects.filter(
                 id_usuario=request.user,
                 id_ejercicio__id_ejercicio=id_ejercicio
             ).delete()
-            return Response({"mensaje": "Eliminado de favoritos", "accion": "eliminado", "deleted": deleted_count}, status=status.HTTP_200_OK)
+            return Response({"mensaje": "Eliminado de favoritos", "accion": "eliminado", "deleted": borrado}, status=status.HTTP_200_OK)
 
         try:
             UsuariosEjerciciosFavoritos.objects.create(
