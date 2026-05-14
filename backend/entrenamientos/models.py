@@ -26,7 +26,7 @@ class Rutinas(models.Model):
         db_table = 'rutinas'
 
 class RutinasEjercicios(models.Model):
-    id_rutina = models.ForeignKey(Rutinas, on_delete=models.CASCADE, db_column='id_rutina')
+    id_rutina = models.ForeignKey(Rutinas, on_delete=models.CASCADE, db_column='id_rutina', primary_key=True)
     id_ejercicio = models.ForeignKey(Ejercicios, on_delete=models.CASCADE, db_column='id_ejercicio')
     orden_ejecucion = models.IntegerField()
 
@@ -36,7 +36,7 @@ class RutinasEjercicios(models.Model):
         unique_together = (('id_rutina', 'id_ejercicio'),) #Evitamos duplicados en la misma rutina
 
 class UsuariosEjerciciosFavoritos(models.Model):
-    id_usuario = models.ForeignKey('usuarios.Usuarios', on_delete=models.CASCADE, db_column='id_usuario')
+    id_usuario = models.ForeignKey('usuarios.Usuarios', on_delete=models.CASCADE, db_column='id_usuario', primary_key=True)
     id_ejercicio = models.ForeignKey(Ejercicios, on_delete=models.CASCADE, db_column='id_ejercicio')
 
     class Meta:
