@@ -10,7 +10,6 @@ class RegistrosProgresoViewSet(viewsets.ModelViewSet):
     serializer_class = RegistrosProgresoSerializer
     permission_classes = [IsAuthenticated]
 
-    # Filtramos para que un usuario solo vea su propio progreso (y puede filtrar por ?fecha=YYYY-MM-DD)
     def get_queryset(self):
         queryset = RegistrosProgreso.objects.filter(id_usuario=self.request.user)
         fecha_filtro = self.request.query_params.get('fecha')
@@ -18,11 +17,9 @@ class RegistrosProgresoViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(fecha=fecha_filtro)
         return queryset.order_by('-fecha')
 
-    # Crear o Actualizar el progreso de una rutina (recibe un Array de ejercicios)
     def create(self, request, *args, **kwargs):
-        registros_data = request.data # [{ id_ejercicio: 1, fecha: "2024-10-10", num_series: 3, detalles_series: [...] }]
+        registros_data = request.data
         
-        # Validar si han mandado uno solo o una lista (por la rutina entera)
         if not isinstance(registros_data, list):
             registros_data = [registros_data]
 
@@ -34,11 +31,10 @@ class RegistrosProgresoViewSet(viewsets.ModelViewSet):
                     fecha = item.get('fecha')
                     
                     if not id_ejercicio or not fecha:
-                        continue # Saltamos malformados
+                        continue
                     
                     ejercicio_instancia = Ejercicios.objects.get(id_ejercicio=id_ejercicio)
 
-                    # Buscamos si ya había un registro de ese ejercicio ESE día y lo actualizamos (o lo creamos)
                     registro, created = RegistrosProgreso.objects.update_or_create(
                         id_usuario=request.user,
                         id_ejercicio=ejercicio_instancia,

@@ -8,10 +8,8 @@ const Login = () => {
   const [error, setError] = useState(null);
   const [cargando, setCargando] = useState(false);
   
-  // -- NUEVOS ESTADOS PARA VISTA DE VERIFICACIÓN --
   const [requiereVerificacion, setRequiereVerificacion] = useState(false);
   const [codigoSms, setCodigoSms] = useState('');
-  // -----------------------------------------------
 
   const { login } = useContext(AuthContext);
 
@@ -58,7 +56,7 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zinc-950 py-12 px-4 transition-colors duration-300">
       <div className="max-w-md w-full bg-white dark:bg-zinc-900 p-10 rounded-2xl shadow-xl border border-gray-200 dark:border-zinc-800 transition-colors duration-300">
         
-        {/* VISTA 1: FORMULARIO NORMAL DE LOGIN */}
+        {/* LOGIN */}
         {!requiereVerificacion ? (
           <>
             <div className="mb-8">
@@ -125,7 +123,7 @@ const Login = () => {
             </form>
           </>
         ) : (
-          /* VISTA 2: FORMULARIO DE VERIFICACIÓN SMS */
+          /* VERIFICACIÓN SMS */
           <form onSubmit={handleVerificacion} className="space-y-4">
               <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white text-center mb-2 tracking-tight">
                   Verifica tu Cuenta

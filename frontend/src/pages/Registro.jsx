@@ -76,7 +76,6 @@ const Registro = () => {
         <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center p-4 transition-colors duration-300">
             <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl w-full max-w-lg p-8 border border-gray-200 dark:border-zinc-800 transition-colors duration-300">
                 
-                {/* Wizard */}
                 <div className="flex justify-between items-center mb-8">
                     {[1, 2, 3].map((step) => (
                         <div key={step} className={`flex items-center ${step < 3 ? 'w-full' : ''}`}>

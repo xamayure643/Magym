@@ -183,7 +183,6 @@
   }
 }
 
-/* Sobrescribir los estilos de react-calendar para usar Tailwind colors */
 .react-calendar {
   width: 100% !important;
   max-width: 100% !important;

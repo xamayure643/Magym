@@ -57,7 +57,7 @@ const Sidebar = ({ usuario }) => {
 
         <nav className="flex-1 mt-4 flex flex-col space-y-1 px-2">
           <Link to="/catalogo" onClick={() => setIsOpen(false)} className={`px-4 py-3 cursor-pointer rounded-lg transition-all ${enlaceActivo('/catalogo')}`}>
-             Catálogo
+            Catálogo
           </Link>
           <Link to="/dashboard" onClick={() => setIsOpen(false)} className={`px-4 py-3 cursor-pointer rounded-lg transition-all ${enlaceActivo('/dashboard')}`}>
             Estadísticas

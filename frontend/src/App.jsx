@@ -3,10 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 
 // Componentes
 import Sidebar from './components/Sidebar';
-import Registro from './pages/Registro';
-import Rutinas from './pages/Rutinas';
-import Progreso from './pages/Progreso';
-import Dashboard from './pages/Dashboard';
 // Páginas
 import Catalogo from './pages/Catalogo';
 import Login from './pages/Login';
@@ -14,6 +10,10 @@ import Nutricion from './pages/Nutricion';
 import Perfil from './pages/Perfil';
 import { AuthProvider, AuthContext } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import Registro from './pages/Registro';
+import Rutinas from './pages/Rutinas';
+import Progreso from './pages/Progreso';
+import Dashboard from './pages/Dashboard';
 
 const LoggedInLayout = ({ children }) => {
   const { usuario } = useContext(AuthContext);

@@ -34,7 +34,6 @@ const Perfil = () => {
     }, []);
 
     // Manejar inputs del formulario
-        // Manejar inputs del formulario y forzar los límites
     const handleChange = (e) => {
         let value = e.target.value;
         const name = e.target.name;

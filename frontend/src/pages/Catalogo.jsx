@@ -156,8 +156,8 @@ const Catalogo = () => {
           arrEjercicios.forEach(ej => {
             if (ej.grupo_muscular) {
               ej.grupo_muscular.split(',').forEach(g => {
-                 const limpiarG = g.trim();
-                 if (limpiarG) gruposUnicos.add(limpiarG);              
+                const limpiarG = g.trim();
+                if (limpiarG) gruposUnicos.add(limpiarG);              
               });
             }
           });
@@ -173,7 +173,7 @@ const Catalogo = () => {
     return () => { unmounted = true; };
   }, []);
 
- const handleMarcarFavorito = async (idEjercicio) => {
+const handleMarcarFavorito = async (idEjercicio) => {
     try {
       const res = await agregarFavorito(idEjercicio);
       console.debug('agregarFavorito response:', res);
@@ -270,40 +270,40 @@ const Catalogo = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
                 <div>
-                   <label className="block text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Buscar por nombre</label>
-                   <input 
+                  <label className="block text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Buscar por nombre</label>
+                  <input 
                       type="text" 
                       placeholder="Ej: Press de banca, Sentadilla..." 
                       className="w-full p-3 bg-gray-50 dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-xl text-gray-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder-gray-400 dark:placeholder-zinc-600"
                       value={textoBusqueda}
                       onChange={e => setTextoBusqueda(e.target.value)}
-                   />
+                  />
                 </div>
 
                 <div>
-                   <label className="block text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Filtrar por Grupo Muscular</label>
-                   <select 
+                  <label className="block text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Filtrar por Grupo Muscular</label>
+                  <select 
                       onChange={handleAñadirFiltroMusculo} 
                       className="w-full p-3 bg-gray-50 dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-xl text-gray-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                       defaultValue=""
-                   >
-                       <option value="" disabled>Añadir filtro de músculo...</option>
-                       {gruposDisponibles.map(g => (
-                           <option key={g} value={g} disabled={musculosSeleccionados.includes(g)}>{g}</option>
-                       ))}
-                   </select>
+                  >
+                      <option value="" disabled>Añadir filtro de músculo...</option>
+                      {gruposDisponibles.map(g => (
+                          <option key={g} value={g} disabled={musculosSeleccionados.includes(g)}>{g}</option>
+                      ))}
+                  </select>
 
                    {/* Tags de músculos */}
-                   {musculosSeleccionados.length > 0 && (
-                     <div className="flex flex-wrap gap-2 mt-4">
+                  {musculosSeleccionados.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-4">
                         {musculosSeleccionados.map(m => (
-                           <span key={m} className="bg-blue-100 dark:bg-blue-600/20 text-blue-800 dark:text-blue-300 text-sm px-3 py-1.5 rounded-lg flex items-center font-bold border border-blue-200 dark:border-blue-500/30">
+                          <span key={m} className="bg-blue-100 dark:bg-blue-600/20 text-blue-800 dark:text-blue-300 text-sm px-3 py-1.5 rounded-lg flex items-center font-bold border border-blue-200 dark:border-blue-500/30">
                               {m}
                               <button onClick={() => handleQuitarMusculo(m)} className="ml-2 hover:text-red-500 font-extrabold w-4 h-4 rounded-full flex items-center justify-center transition-colors">×</button>
-                           </span>
+                          </span>
                         ))}
-                     </div>
-                   )}
+                    </div>
+                  )}
                 </div>
             </div>
 
@@ -347,7 +347,7 @@ const Catalogo = () => {
                 ← Anterior
               </button>
               
-              {/* Mostrar siempre 5 páginas */}
+              {/* Mostrar 5 páginas */}
               {Array.from(
                 { length: Math.ceil(ejerciciosFiltrados.length / ejerciciosPorPagina) },
                 (_, i) => i + 1

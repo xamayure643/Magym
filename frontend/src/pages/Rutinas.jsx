@@ -46,7 +46,6 @@ const Rutinas = () => {
     return () => { unmounted = true; };
   }, []);
 
-  // --- ACTIONS: Rutinas ---
   const handleEliminar = async (idRutina) => {
     setRutinaAEliminar(idRutina);
     setConfirmacionAbierta(true);
@@ -74,7 +73,6 @@ const Rutinas = () => {
   const abrirModalEditar = (rutina) => {
     setRutinaEditando(rutina.id_rutina);
     setNombreRutina(rutina.nombre);
-    // Clonamos los ejercicios para no mutar el state original hasta guardar
     setEjerciciosSeleccionados([...(rutina.ejercicios || [])]);
     setBusqueda('');
     setModalAbierto(true);
@@ -100,7 +98,6 @@ const Rutinas = () => {
       }
       setModalAbierto(false);
       
-      // Recargamos los datos para ver los cambios refrescados
       const resRutinas = await obtenerRutinas();
       setRutinas(resRutinas);
     } catch {
@@ -108,7 +105,6 @@ const Rutinas = () => {
     }
   };
 
-  // --- ACTIONS: Ejercicios del Modal ---
   const handleAgregarEjercicio = (ejercicio) => {
     setEjerciciosSeleccionados([...ejerciciosSeleccionados, ejercicio]);
     setBusqueda(''); 
@@ -120,7 +116,6 @@ const Rutinas = () => {
     setEjerciciosSeleccionados(nuevos);
   };
 
-  // --- LOGICA DRAG & DROP NATIVA ---
   const handleDragStart = (e, index) => { setDragStartIdx(index); };
   const handleDragEnter = (e, index) => { setDragEnterIdx(index); };
   const handleDragEnd = () => {
@@ -174,9 +169,9 @@ const Rutinas = () => {
                     <div key={ej.id_ejercicio + '-' + ej.orden_ejecucion} className="flex items-center gap-3 text-sm text-gray-700 dark:text-zinc-300 bg-gray-50 dark:bg-zinc-950/50 p-2.5 rounded-xl border border-gray-100 dark:border-zinc-800/50 transition-colors">
                       <span className="font-black text-gray-400 dark:text-zinc-600 w-5 text-center">{ej.orden_ejecucion}</span>
                       {ej.imagen_url ? (
-                         <img src={ej.imagen_url} alt="ej" className="w-10 h-10 rounded-lg object-cover border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"/>
+                        <img src={ej.imagen_url} alt="ej" className="w-10 h-10 rounded-lg object-cover border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"/>
                       ) : (
-                         <div className="w-10 h-10 bg-gray-200 dark:bg-zinc-800 rounded-lg flex items-center justify-center shrink-0"><span className="text-xs text-gray-500">Img</span></div>
+                        <div className="w-10 h-10 bg-gray-200 dark:bg-zinc-800 rounded-lg flex items-center justify-center shrink-0"><span className="text-xs text-gray-500">Img</span></div>
                       )}
                       <span className="truncate font-semibold">{ej.nombre}</span>
                     </div>
@@ -191,7 +186,6 @@ const Rutinas = () => {
         )}
       </div>
 
-      {/* MODAL DE EDICIÓN / CREACIÓN */}
       {modalAbierto && (
         <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
           <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-800 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
@@ -229,8 +223,8 @@ const Rutinas = () => {
                         onClick={() => handleAgregarEjercicio(ej)}
                         className="w-full text-left px-4 py-3 hover:bg-blue-50 dark:hover:bg-blue-600/20 text-gray-800 dark:text-zinc-200 font-medium border-b border-gray-100 dark:border-zinc-800 last:border-0 transition-colors flex items-center gap-3"
                       >
-                         {ej.imagen_url && <img src={ej.imagen_url} alt="" className="w-8 h-8 rounded-md object-cover border border-gray-200 dark:border-zinc-700" />}
-                         {ej.nombre}
+                        {ej.imagen_url && <img src={ej.imagen_url} alt="" className="w-8 h-8 rounded-md object-cover border border-gray-200 dark:border-zinc-700" />}
+                        {ej.nombre}
                       </button>
                     ))}
                   </div>
@@ -258,12 +252,12 @@ const Rutinas = () => {
                         className={`flex items-center justify-between p-3 bg-white dark:bg-zinc-900 border ${dragEnterIdx === index ? 'border-blue-500 dark:border-blue-500 border-2 border-dashed' : 'border-gray-200 dark:border-zinc-700'} rounded-xl shadow-sm cursor-grab active:cursor-grabbing hover:border-blue-300 dark:hover:border-zinc-600 transition-colors`}
                       >
                         <div className="flex items-center gap-4">
-                           <div className="text-gray-400 dark:text-zinc-500 cursor-grab px-1" title="Arrastrar para ordenar">
-                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8h16M4 16h16"></path></svg>
-                           </div>
-                           <span className="font-black text-gray-400 dark:text-zinc-600 w-5">{index + 1}</span>
-                           {ej.imagen_url && <img src={ej.imagen_url} alt="" className="w-12 h-12 rounded-lg object-cover border border-gray-200 dark:border-zinc-800" />}
-                           <span className="font-bold text-gray-900 dark:text-white leading-tight">{ej.nombre}</span>
+                          <div className="text-gray-400 dark:text-zinc-500 cursor-grab px-1" title="Arrastrar para ordenar">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8h16M4 16h16"></path></svg>
+                          </div>
+                          <span className="font-black text-gray-400 dark:text-zinc-600 w-5">{index + 1}</span>
+                          {ej.imagen_url && <img src={ej.imagen_url} alt="" className="w-12 h-12 rounded-lg object-cover border border-gray-200 dark:border-zinc-800" />}
+                          <span className="font-bold text-gray-900 dark:text-white leading-tight">{ej.nombre}</span>
                         </div>
                         <button 
                           onClick={() => handleQuitarEjercicio(index)} 

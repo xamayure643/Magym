@@ -18,11 +18,9 @@ const Nutricion = () => {
     const [cargando, setCargando] = useState(false);
     const [error, setError] = useState('');
 
-    // Estados para modal de confirmación
     const [confirmacionAbierta, setConfirmacionAbierta] = useState(false);
     const [registroAEliminar, setRegistroAEliminar] = useState(null);
 
-    // FUNCIÓN PRINCIPAL DE CARGA (Sin useCallback, se controla en el useEffect)
     const cargarDatosDelDia = async () => {
         try {
             setCargando(true);
@@ -54,7 +52,6 @@ const Nutricion = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fecha]);
 
-    // 2. EFECTO DE AUTOCOMPLETADO (Debounce buscador)
     useEffect(() => {
         const fetchAlimentos = async () => {
             try {
@@ -76,7 +73,6 @@ const Nutricion = () => {
         return () => clearTimeout(delayDebounceFn);
     }, [queryBusqueda]);
 
-    // OTRAS FUNCIONES PARA INTERFAZ
     const manejarSeleccion = (alimento) => {
         setAlimentoSeleccionado(alimento);
         setQueryBusqueda(alimento.nombre);
@@ -119,7 +115,6 @@ const Nutricion = () => {
         }
     };
 
-    // VARIABLES PARA LA BARRA DE PROGRESO
     const colorCalorias = totales.calorias > metaReal.calorias ? 'text-red-500' : 'text-green-500';
     const porcentajeCalorias = Math.min((totales.calorias / metaReal.calorias) * 100, 100) || 0;
     const porcentajeProteinas = Math.min((totales.proteinas / metaReal.proteinas) * 100, 100) || 0;

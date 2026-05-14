@@ -30,10 +30,8 @@ class RegistrosNutricionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-    # Siempre limitamos por usuario autenticado
         queryset = RegistrosNutricion.objects.filter(id_usuario=self.request.user)
 
-        # Solo en listado aplicamos filtro por fecha (por defecto hoy)
         if self.action == 'list':
             fecha_consulta = self.request.query_params.get('fecha', date.today())
             queryset = queryset.filter(fecha=fecha_consulta)
@@ -52,7 +50,6 @@ class RegistrosNutricionViewSet(viewsets.ModelViewSet):
             gramos = float(cantidad_gramos)
             alimento = Alimentos.objects.get(id_alimento=id_alimento)
             
-            # Calcular los macros basados en los gramos multiplicando por las macros de 1 gramo
             calorias_calculadas = float(alimento.calorias_por_gramo) * gramos
             proteinas_calculadas = float(alimento.proteinas_por_gramo) * gramos
 

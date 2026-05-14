@@ -23,30 +23,22 @@ class RegistroUsuarioView(APIView):
             telefono_real = request.data.get('telefono')
             correo = request.data.get('correo') 
 
-            # Usamos una transacción para asegurarnos de que SI FALLA el envío del SMS
-            # no se guarde el usuario en la base de datos.
             try:
                 with transaction.atomic():
-                    # 1. Guardamos en BD (cuenta_activa = False por el serializer)
                     usuario = serializer.save()
 
-                    # 2. Generamos y enviamos el SMS
                     codigo_generado = enviar_sms_verificacion(telefono_real)
 
                     if not codigo_generado:
-                        # Lanzamos excepción para hacer rollback y no dejar usuario creado
                         raise RuntimeError("Fallo al enviar SMS de verificación")
 
-                    # 3. Guardamos SOLO el código en la caché
-                    cache.set(f"codigo_verificacion_{correo}", codigo_generado, timeout=300) # 5 minutos
+                    cache.set(f"codigo_verificacion_{correo}", codigo_generado, timeout=300)
 
-                # Si llegamos aquí, todo fue bien y la transacción se commit
                 return Response(
                     {"mensaje": "Usuario creado (inactivo). SMS enviado. Esperando verificación.", "correo": correo}, 
                     status=status.HTTP_201_CREATED
                 )
             except Exception as e:
-                # No se creó el usuario por error en el envío del SMS u otro fallo
                 return Response({"error": "Error al crear usuario: no se ha guardado. " + str(e)}, status=status.HTTP_400_BAD_REQUEST)
             
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -62,7 +54,6 @@ class VerificarCodigoView(APIView):
         if not correo or not codigo_usuario:
             return Response({"error": "Faltan datos."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 1. Recuperamos el código de verificación de la caché
         codigo_guardado = cache.get(f"codigo_verificacion_{correo}")
 
         if not codigo_guardado:
@@ -71,20 +62,15 @@ class VerificarCodigoView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # 2. Comparamos el código introducido con el guardado
         if str(codigo_guardado) == str(codigo_usuario):
-            # 3. ACTIVAMOS AL USUARIO EN LA BBDD
             try:
                 usuario = Usuarios.objects.get(correo=correo)
                 usuario.cuenta_activa = True
                 usuario.save()
                 
-                # Borramos la evidencia de la RAM
                 cache.delete(f"codigo_verificacion_{correo}") 
                 
-                # 4. AUTO-LOGIN: Generamos tokens para iniciar sesión directamente tras verificar SMS
                 refresh = RefreshToken()
-                # ¡IMPORTANTE: TIENE QUE LLAMARSE user_id PARA QUE SIMPLE_JWT LO ENTIENDA!
                 refresh['user_id'] = usuario.id_usuario 
                 refresh['nombre'] = usuario.nombre
                 refresh['correo'] = usuario.correo
@@ -179,7 +165,6 @@ class PerfilUsuarioView(APIView):
         
     def patch(self, request):
         usuario = request.user
-        # partial=True permite actualizar selectivamente solo los campos enviados (ej. solo el peso)
         serializer = PerfilUsuarioSerializer(usuario, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()

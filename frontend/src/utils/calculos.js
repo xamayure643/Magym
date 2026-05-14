@@ -4,7 +4,6 @@ export const calcularMetas = (perfil) => {
     const peso = parseFloat(perfil.peso);
     let altura = parseFloat(perfil.altura);
     
-    // CORRECCIÓN: Si el usuario puso 1.80 (metros) en lugar de 180 (cm), lo convertimos a cm para arreglar la fórmula
     if (altura < 3) altura *= 100; 
 
     // 1. Tasa Metabólica Basal (Mifflin-St Jeor)
@@ -33,12 +32,11 @@ export const calcularMetas = (perfil) => {
 
     let tdee = bmr * factor;
 
-    // 3. Ajuste por Objetivo
     const objetivo = perfil.objetivo?.toLowerCase() || '';
     if (objetivo.includes('perder') || objetivo.includes('grasa')) tdee -= 500;
     else if (objetivo.includes('ganar') || objetivo.includes('musculo')) tdee += 500;
 
-    // Proteínas diarias (en base enfocada al fitness: aprox 2g por kg de peso corporal)
+    // Proteínas diarias ( 2g por kg de peso corporal)
     let proteinas = peso * 2;
 
     return {
