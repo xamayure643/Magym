@@ -1,5 +1,3 @@
-from operator import add
-
 from django.db import models
 
 class Ejercicios(models.Model):
@@ -19,7 +17,7 @@ class Rutinas(models.Model):
     id_rutina = models.AutoField(primary_key=True)
     id_usuario = models.ForeignKey('usuarios.Usuarios', on_delete=models.CASCADE, db_column='id_usuario')
     nombre = models.CharField(max_length=100)
-    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_creacion = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = False
