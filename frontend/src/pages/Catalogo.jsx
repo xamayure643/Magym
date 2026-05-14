@@ -146,7 +146,11 @@ const Catalogo = () => {
         
         if (!unmounted) {
           setEjercicios(arrEjercicios);
-          setMisFavoritosId(arrFavoritos.map(fav => fav.id_ejercicio));
+          setMisFavoritosId(arrFavoritos.map(fav => {
+            // fav.id_ejercicio puede ser un objeto (por serializador) o un entero; normalizamos a entero
+            if (fav && typeof fav.id_ejercicio === 'object') return fav.id_ejercicio.id_ejercicio;
+            return fav.id_ejercicio;
+          }));
 
           const gruposUnicos = new Set();
           arrEjercicios.forEach(ej => {
@@ -172,12 +176,16 @@ const Catalogo = () => {
  const handleMarcarFavorito = async (idEjercicio) => {
     try {
       const res = await agregarFavorito(idEjercicio);
+      console.debug('agregarFavorito response:', res);
       
       if (res.accion === 'eliminado') {
-        setMisFavoritosId(misFavoritosId.filter(id => id !== idEjercicio));
+        setMisFavoritosId(prev => prev.filter(id => id !== idEjercicio));
         setMensaje({ tipo: 'exito', texto: res.mensaje || 'Eliminado de favoritos' });
       } else {
-        setMisFavoritosId([...misFavoritosId, idEjercicio]);
+        setMisFavoritosId(prev => {
+          if (prev.includes(idEjercicio)) return prev;
+          return [...prev, idEjercicio];
+        });
         setMensaje({ tipo: 'exito', texto: res.mensaje || 'Añadido a favoritos ❤️' });
       }
 
