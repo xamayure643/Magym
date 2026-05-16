@@ -3,9 +3,6 @@ from twilio.rest import Client
 from django.conf import settings
 
 def enviar_sms_verificacion(telefono_destino):
-    """
-    Genera un código de 6 dígitos y se comunica con la API de Twilio para enviarlo.
-    """
     try:
         cliente = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
         

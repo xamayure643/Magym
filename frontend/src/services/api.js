@@ -2,13 +2,96 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://alejandro.integramarketingdigital.es/api';
 
+// 1. CREACIÓN DE INSTANCIAS AXIOS
 const api = axios.create({
     baseURL: `${API_BASE_URL}/usuarios`,
-    headers: {
-        'Content-Type': 'application/json'
-    }
+    headers: { 'Content-Type': 'application/json' }
 });
 
+const apiEntrenamientos = axios.create({
+    baseURL: `${API_BASE_URL}/entrenamientos`,
+    headers: { 'Content-Type': 'application/json' }
+});
+
+const apiProgreso = axios.create({
+    baseURL: `${API_BASE_URL}/progreso`,
+    headers: { 'Content-Type': 'application/json' }
+});
+
+const apiNutricion = axios.create({
+    baseURL: `${API_BASE_URL}/nutricion`,
+    headers: { 'Content-Type': 'application/json' }
+});
+
+// 2. INTERCEPTORES DE PETICIÓN (Request)
+const requestInterceptor = (config) => {
+    const token = localStorage.getItem('access');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+};
+
+apiEntrenamientos.interceptors.request.use(requestInterceptor);
+apiProgreso.interceptors.request.use(requestInterceptor);
+apiNutricion.interceptors.request.use(requestInterceptor);
+
+
+// 3. ROTACIÓN DE TOKENS (Refresh)
+const refrescarToken = async () => {
+    try {
+        const refresh = localStorage.getItem('refresh');
+        if (!refresh) throw new Error("No hay refresh token disponible");
+
+        const response = await axios.post(`${API_BASE_URL}/usuarios/refresh/`, { refresh });
+        
+        const newAccess = response.data.access;
+        localStorage.setItem('access', newAccess);
+        
+        if (response.data.refresh) {
+            localStorage.setItem('refresh', response.data.refresh);
+        }
+        
+        return newAccess;
+    } catch (error) {
+        localStorage.removeItem('access');
+        localStorage.removeItem('refresh');
+        localStorage.removeItem('usuario_nombre');
+        window.location.href = '/login'; 
+        throw error;
+    }
+};
+
+const responseInterceptor = async (error) => {
+    const originalRequest = error.config;
+
+    if (originalRequest.url.includes('/login') || originalRequest.url.includes('/registro')) {
+        return Promise.reject(error);
+    }
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+
+        try {
+            const newAccessToken = await refrescarToken();
+            
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            
+            return axios(originalRequest);
+        } catch (refreshError) {
+            return Promise.reject(refreshError);
+        }
+    }
+    return Promise.reject(error);
+};
+
+api.interceptors.response.use((response) => response, responseInterceptor);
+apiEntrenamientos.interceptors.response.use((response) => response, responseInterceptor);
+apiProgreso.interceptors.response.use((response) => response, responseInterceptor);
+apiNutricion.interceptors.response.use((response) => response, responseInterceptor);
+
+
+// --- USUARIOS ---
 export const registrarUsuario = async (datosUsuario) => {
     try {
         const response = await api.post('/registro/', datosUsuario);
@@ -27,21 +110,50 @@ export const verificarCodigoSms = async (correo, codigo) => {
     }
 };
 
-const apiEntrenamientos = axios.create({
-    baseURL: `${API_BASE_URL}/entrenamientos`,
-    headers: {
-        'Content-Type': 'application/json'
+export const loginUsuario = async (credenciales) => {
+    try {
+        const response = await api.post('/login/', credenciales);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Error de conexión" };
     }
-});
+};
 
-apiEntrenamientos.interceptors.request.use((config) => {
-    const token = localStorage.getItem('access');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+export const logoutUsuario = async (refresh) => {
+    try {
+        const response = await api.post('/logout/', { refresh });
+        return response.data;
+    } catch (error) {
+        console.warn("Fallo silencioso en el logout del servidor", error);
+        return true; 
     }
-    return config;
-});
+};
 
+export const obtenerPerfil = async () => {
+    try {
+        const token = localStorage.getItem('access');
+        const response = await api.get('/perfil/', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Error al cargar perfil" };
+    }
+};
+
+export const actualizarPerfil = async (datos) => {
+    try {
+        const token = localStorage.getItem('access');
+        const response = await api.patch('/perfil/', datos, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Error al actualizar perfil" };
+    }
+};
+
+// --- ENTRENAMIENTOS / RUTINAS ---
 export const obtenerEjercicios = async (grupoMuscular = '') => {
     try {
         const params = grupoMuscular ? { grupo_muscular__icontains: grupoMuscular } : {};
@@ -70,54 +182,6 @@ export const agregarFavorito = async (id_ejercicio) => {
     }
 };
 
-
-export const loginUsuario = async (credenciales) => {
-    try {
-        const response = await api.post('/login/', credenciales);
-        return response.data;
-    } catch (error) {
-        throw error.response?.data || { error: "Error de conexión" };
-    }
-};
-
-export const logoutUsuario = async (refresh) => {
-    try {
-        const response = await api.post('/logout/', { refresh });
-        return response.data;
-    } catch (error) {
-        console.warn("Fallo silencioso en el logout del servidor", error);
-        return true; 
-    }
-};
-
-export const obtenerPerfil = async () => {
-    try {
-        const token = localStorage.getItem('access');
-        const response = await api.get('/perfil/', {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-        return response.data;
-    } catch (error) {
-        throw error.response?.data || { error: "Error al cargar perfil" };
-    }
-};
-
-export const actualizarPerfil = async (datos) => {
-    try {
-        const token = localStorage.getItem('access');
-        const response = await api.patch('/perfil/', datos, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        return response.data;
-    } catch (error) {
-        throw error.response?.data || { error: "Error al actualizar perfil" };
-    }
-};
-
-
-// --- RUTINAS ---
 export const obtenerRutinas = async () => {
     try {
         const response = await apiEntrenamientos.get('/rutinas/');
@@ -154,18 +218,7 @@ export const eliminarRutina = async (idRutina) => {
     }
 };
 
-// --- PROGRESO (Registros de Calendario) ---
-const apiProgreso = axios.create({
-    baseURL: `${API_BASE_URL}/progreso`,
-    headers: { 'Content-Type': 'application/json' }
-});
-
-apiProgreso.interceptors.request.use((config) => {
-    const token = localStorage.getItem('access');
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-    return config;
-});
-
+// --- PROGRESO ---
 export const obtenerProgreso = async (fecha) => {
     try {
         const response = await apiProgreso.get(`/registros/?fecha=${fecha}`);
@@ -193,18 +246,7 @@ export const guardarProgreso = async (datosProgresoArray) => {
     }
 };
 
-// --- NUTRICION ---
-const apiNutricion = axios.create({
-    baseURL: `${API_BASE_URL}/nutricion`,
-    headers: { 'Content-Type': 'application/json' }
-});
-
-apiNutricion.interceptors.request.use((config) => {
-    const token = localStorage.getItem('access');
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-    return config;
-});
-
+// --- NUTRICIÓN ---
 export const buscarAlimentos = async (query = '') => {
     try {
         const response = await apiNutricion.get(`/alimentos/?nombre__icontains=${query}`);
@@ -216,9 +258,7 @@ export const buscarAlimentos = async (query = '') => {
 
 export const obtenerNutricionHoy = async (fecha) => {
     try {
-        // Obtenemos todos los registros del día
         const responseRegistros = await apiNutricion.get(`/registros/?fecha=${fecha}`);
-        // Obtenemos los totales del día
         const responseTotales = await apiNutricion.get(`/registros/hoy/?fecha=${fecha}`);
         
         return {
