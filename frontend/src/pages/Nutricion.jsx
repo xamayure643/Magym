@@ -6,7 +6,6 @@ import ConfirmationModal from '../components/ConfirmationModal';
 const Nutricion = () => {
     const todayStr = new Date().toISOString().split('T')[0];
 
-    // Estados
     const [fecha, setFecha] = useState(todayStr);
     const [queryBusqueda, setQueryBusqueda] = useState('');
     const [resultadosAlimentos, setResultadosAlimentos] = useState([]);
@@ -46,7 +45,6 @@ const Nutricion = () => {
         }
     };
 
-    // 1. EFECTO PARA CARGAR DATOS CUANDO CAMBIA LA FECHA
     useEffect(() => {
         cargarDatosDelDia();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -91,7 +89,7 @@ const Nutricion = () => {
             setAlimentoSeleccionado(null);
             setQueryBusqueda('');
             setGramos('');
-            cargarDatosDelDia(); // Refresca tras añadir
+            cargarDatosDelDia();
         } catch (err) {
             setError(err.error || 'Error al registrar el alimento');
         }
@@ -137,7 +135,6 @@ const Nutricion = () => {
             {error && <div className="p-3 bg-red-100 text-red-700 rounded-lg">{error}</div>}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Panel Izquierdo: Buscador */}
                 <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-zinc-800">
                     <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Añadir Alimento</h2>
                     
@@ -193,7 +190,6 @@ const Nutricion = () => {
                     </div>
                 </div>
 
-                {/* Panel Derecho: Resumen */}
                 <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col justify-center">
                     <h2 className="text-lg font-semibold mb-6 text-gray-800 dark:text-gray-200">Resumen Diario</h2>
                     
@@ -231,7 +227,6 @@ const Nutricion = () => {
                 </div>
             </div>
 
-            {/* Historial inferior */}
             <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 overflow-hidden">
                 <div className="p-4 border-b border-gray-100 dark:border-zinc-800">
                     <h3 className="font-semibold text-gray-800 dark:text-gray-200">Historial ({(registrosDia || []).length})</h3>
@@ -264,7 +259,6 @@ const Nutricion = () => {
                 )}
             </div>
 
-            {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
             <ConfirmationModal
                 isOpen={confirmacionAbierta}
                 titulo="Eliminar Alimento"

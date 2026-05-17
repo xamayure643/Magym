@@ -89,7 +89,6 @@ const Registro = () => {
                     ))}
                 </div>
 
-                {/* PASO 1 */}
                 {paso === 1 && (
                     <form onSubmit={handleSiguientePaso} className="space-y-4">
                         <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white text-center mb-6 tracking-tight">Tus Credenciales</h2>
@@ -130,7 +129,6 @@ const Registro = () => {
                     </form>
                 )}
 
-                {/* PASO 2 */}
                 {paso === 2 && (
                     <form onSubmit={handleSubmitRegistro} className="space-y-4">
                         <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white text-center mb-6 tracking-tight">Tu Físico y Objetivos</h2>
@@ -190,7 +188,6 @@ const Registro = () => {
                     </form>
                 )}
 
-                {/* PASO 3 */}
                 {paso === 3 && (
                     <form onSubmit={handleVerificacion} className="space-y-4">
                         <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white text-center mb-2 tracking-tight">Verifica tu Teléfono</h2>

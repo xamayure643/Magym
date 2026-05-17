@@ -31,7 +31,7 @@ class RutinasEjercicios(models.Model):
     class Meta:
         managed = False
         db_table = 'rutinas_ejercicios'
-        unique_together = (('id_rutina', 'id_ejercicio'),) #Evitamos duplicados en la misma rutina
+        unique_together = (('id_rutina', 'id_ejercicio'),)
 
 class UsuariosEjerciciosFavoritos(models.Model):
     id_usuario = models.ForeignKey('usuarios.Usuarios', on_delete=models.CASCADE, db_column='id_usuario', primary_key=True)
@@ -40,4 +40,4 @@ class UsuariosEjerciciosFavoritos(models.Model):
     class Meta:
         managed = False
         db_table = 'usuarios_ejercicios_favoritos'
-        unique_together = (('id_usuario', 'id_ejercicio'),) #Evitamos duplicados en favoritos
+        unique_together = (('id_usuario', 'id_ejercicio'),)

@@ -9,7 +9,6 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         alimentos_creados = 0
         
-        #Tags de categorías para buscarlas en la API
         categorias = [
             'en:dairies', 'en:cheeses', 'en:meats', 'en:fishes', 
             'en:fruits', 'en:vegetables', 'en:cereals', 'en:legumes', 
@@ -26,13 +25,12 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING(f"\n--- Procesando: {categoria} ---"))
             insertados = 0
 
-            #Alimentos
             url_json = f"https://es.openfoodfacts.org/api/v2/search?categories_tags={categoria}&fields=product_name,nutriments&page_size=100&page=1"
             
             exito = False
             for intento in range(3):
                 try:
-                    response = requests.get(url_json, headers=headers, timeout=15) #Descargamos el JSON
+                    response = requests.get(url_json, headers=headers, timeout=15)
                     
                     if response.status_code == 200:
                         exito = True

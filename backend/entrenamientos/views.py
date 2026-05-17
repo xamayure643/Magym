@@ -34,13 +34,11 @@ class FavoritosViewSet(viewsets.ModelViewSet):
         except Ejercicios.DoesNotExist:
             return Response({"error": "El ejercicio no existe"}, status=status.HTTP_404_NOT_FOUND)
 
-        #Comprobamos que exista para no intentar añadirlo de nuevo
         favorito_existente = UsuariosEjerciciosFavoritos.objects.filter(
             id_usuario=request.user,
             id_ejercicio=ejercicio
         ).first()
 
-        #Si existia, se borra
         if favorito_existente:
             borrado, _ = UsuariosEjerciciosFavoritos.objects.filter(
                 id_usuario=request.user,

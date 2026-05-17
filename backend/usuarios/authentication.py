@@ -4,10 +4,6 @@ from .models import Usuarios
 
 class CustomJWTAuthentication(JWTAuthentication):
     def get_user(self, validated_token):
-        """
-        Sobrescribimos este método para que SimpleJWT busque al usuario 
-        en nuestro modelo personalizado 'Usuarios' y no en 'auth_user'.
-        """
         try:
             user_id = validated_token.get('user_id')
             if not user_id:

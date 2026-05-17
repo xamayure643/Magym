@@ -97,7 +97,6 @@ const TarjetaEjercicio = ({ ejercicio, esFavorito, handleMarcarFavorito }) => {
           ))}
         </div>
         
-        {/* Descripción */}
         <div className="flex-1 mb-6 flex flex-col justify-start">
             <p className="text-gray-600 dark:text-zinc-400 text-sm font-medium whitespace-pre-wrap leading-relaxed">
               {expandido ? ejercicio.descripcion : descripcionCorta}
@@ -130,7 +129,7 @@ const Catalogo = () => {
   const [mensaje, setMensaje] = useState(null);
   
   const [gruposDisponibles, setGruposDisponibles] = useState([]); 
-  const [vistaActual, setVistaActual] = useState('todos'); // 'todos' o 'favoritos'
+  const [vistaActual, setVistaActual] = useState('todos');
   const [textoBusqueda, setTextoBusqueda] = useState('');
   const [musculosSeleccionados, setMusculosSeleccionados] = useState([]);
   const [paginaActual, setPaginaActual] = useState(1);
@@ -147,7 +146,6 @@ const Catalogo = () => {
         if (!unmounted) {
           setEjercicios(arrEjercicios);
           setMisFavoritosId(arrFavoritos.map(fav => {
-            // fav.id_ejercicio puede ser un objeto (por serializador) o un entero; normalizamos a entero
             if (fav && typeof fav.id_ejercicio === 'object') return fav.id_ejercicio.id_ejercicio;
             return fav.id_ejercicio;
           }));
@@ -196,9 +194,8 @@ const handleMarcarFavorito = async (idEjercicio) => {
 
   const cerrarToast = () => setMensaje(null);
 
-  // Resetear página cuando cambian filtros
   useEffect(() => {
-    setPaginaActual(1); // eslint-disable-line react-hooks/exhaustive-deps, no-use-before-define
+    setPaginaActual(1);
   }, [textoBusqueda, musculosSeleccionados, vistaActual]);
 
   const handleAñadirFiltroMusculo = (e) => {
@@ -219,7 +216,6 @@ const handleMarcarFavorito = async (idEjercicio) => {
       setPaginaActual(1);
   };
 
-  // Lógica de filtrado en cliente
   let ejerciciosFiltrados = ejercicios;
 
   if (vistaActual === 'favoritos') {
@@ -265,7 +261,6 @@ const handleMarcarFavorito = async (idEjercicio) => {
             </div>
         </div>
 
-        {/* Panel de Filtros */}
         <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-xl border border-gray-200 dark:border-zinc-800 mb-10 transition-colors">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
@@ -293,7 +288,6 @@ const handleMarcarFavorito = async (idEjercicio) => {
                       ))}
                   </select>
 
-                   {/* Tags de músculos */}
                   {musculosSeleccionados.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-4">
                         {musculosSeleccionados.map(m => (
@@ -336,7 +330,6 @@ const handleMarcarFavorito = async (idEjercicio) => {
             ))}
           </div>
 
-          {/* PAGINACIÓN */}
           {Math.ceil(ejerciciosFiltrados.length / ejerciciosPorPagina) > 1 && (
             <div className="mt-10 flex justify-center gap-2 flex-wrap items-center">
               <button
@@ -347,7 +340,6 @@ const handleMarcarFavorito = async (idEjercicio) => {
                 ← Anterior
               </button>
               
-              {/* Mostrar 5 páginas */}
               {Array.from(
                 { length: Math.ceil(ejerciciosFiltrados.length / ejerciciosPorPagina) },
                 (_, i) => i + 1

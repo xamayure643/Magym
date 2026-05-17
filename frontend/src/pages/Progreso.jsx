@@ -136,7 +136,6 @@ const Progreso = () => {
 
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6">
         
-        {/* PARTE IZQUIERDA: Selector y Calendario */}
         <div className="w-full md:w-1/3 flex flex-col gap-6">
           <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 rounded-2xl shadow-xl transition-colors">
             <label className="block text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider mb-3">1. Selecciona Rutina</label>
@@ -171,7 +170,6 @@ const Progreso = () => {
           </div>
         </div>
 
-        {/* PARTE DERECHA: Formulario */}
         <div className="w-full md:w-2/3 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 md:p-8 rounded-2xl shadow-xl transition-colors">
           {!rutinaSeleccionada ? (
             <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-gray-400 dark:text-zinc-500 space-y-4">

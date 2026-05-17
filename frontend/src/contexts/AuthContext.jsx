@@ -3,14 +3,11 @@ import React, { createContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { logoutUsuario } from '../services/api';
 
-// 1. Exportamos el Contexto
 export const AuthContext = createContext();
 
-// 2. Exportamos el Proveedor
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
-  // Inicializamos el estado 
   const [usuario, setUsuario] = useState(() => {
     const token = localStorage.getItem('access');
     const storedUser = localStorage.getItem('usuario_nombre');

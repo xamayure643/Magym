@@ -2,7 +2,6 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://alejandro.integramarketingdigital.es/api';
 
-// 1. CREACIÓN DE INSTANCIAS AXIOS
 const api = axios.create({
     baseURL: `${API_BASE_URL}/usuarios`,
     headers: { 'Content-Type': 'application/json' }
@@ -23,7 +22,6 @@ const apiNutricion = axios.create({
     headers: { 'Content-Type': 'application/json' }
 });
 
-// 2. INTERCEPTORES DE PETICIÓN (Request)
 const requestInterceptor = (config) => {
     const token = localStorage.getItem('access');
     if (token) {
@@ -37,7 +35,6 @@ apiProgreso.interceptors.request.use(requestInterceptor);
 apiNutricion.interceptors.request.use(requestInterceptor);
 
 
-// 3. ROTACIÓN DE TOKENS (Refresh)
 const refrescarToken = async () => {
     try {
         const refresh = localStorage.getItem('refresh');
@@ -91,7 +88,6 @@ apiProgreso.interceptors.response.use((response) => response, responseIntercepto
 apiNutricion.interceptors.response.use((response) => response, responseInterceptor);
 
 
-// --- USUARIOS ---
 export const registrarUsuario = async (datosUsuario) => {
     try {
         const response = await api.post('/registro/', datosUsuario);
@@ -153,7 +149,6 @@ export const actualizarPerfil = async (datos) => {
     }
 };
 
-// --- ENTRENAMIENTOS / RUTINAS ---
 export const obtenerEjercicios = async (grupoMuscular = '') => {
     try {
         const params = grupoMuscular ? { grupo_muscular__icontains: grupoMuscular } : {};
@@ -218,7 +213,6 @@ export const eliminarRutina = async (idRutina) => {
     }
 };
 
-// --- PROGRESO ---
 export const obtenerProgreso = async (fecha) => {
     try {
         const response = await apiProgreso.get(`/registros/?fecha=${fecha}`);
@@ -246,7 +240,6 @@ export const guardarProgreso = async (datosProgresoArray) => {
     }
 };
 
-// --- NUTRICIÓN ---
 export const buscarAlimentos = async (query = '') => {
     try {
         const response = await apiNutricion.get(`/alimentos/?nombre__icontains=${query}`);

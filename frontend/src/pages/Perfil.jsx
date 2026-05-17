@@ -8,11 +8,9 @@ const Perfil = () => {
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(null);
     
-    // Estado para edición
     const [editando, setEditando] = useState(false);
     const [formData, setFormData] = useState({});
 
-    // Carga de Perfil inicial
     useEffect(() => {
         const fetchPerfil = async () => {
             try {
@@ -33,30 +31,26 @@ const Perfil = () => {
         fetchPerfil();
     }, []);
 
-    // Manejar inputs del formulario
     const handleChange = (e) => {
         let value = e.target.value;
         const name = e.target.name;
 
-        // Limitar la frecuencia de entreno de 0 a 7 en el frontend
         if (name === 'frecuencia_entrenamiento') {
             if (value !== '' && (parseInt(value) < 0 || parseInt(value) > 7)) {
-                return; // Bloquea si intentan poner un 8 o un -1
+                return;
             }
         }
         
-        // Limitar la altura máxima a algo lógico (ej: 250cm) y el peso a valores positivos
         if (name === 'altura' && parseInt(value) > 300) return;
         if (name === 'peso' && parseInt(value) < 0) return;
 
         setFormData({ ...formData, [name]: value });
     };
 
-    // Guardar cambios en Backend
     const handleGuardar = async () => {
         try {
             const dataGuardada = await actualizarPerfil(formData);
-            setPerfil(dataGuardada); // Actualiza estado visual
+            setPerfil(dataGuardada);
             setEditando(false);
         } catch (err) {
             setError(err.error || 'Error al actualizar el perfil');
@@ -79,7 +73,6 @@ const Perfil = () => {
 
                         <div className="bg-white dark:bg-zinc-900 rounded-xl p-8 shadow-sm border">
                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 border-b pb-6 mb-6">
-                    {/* AVATAR: Añadido flex-shrink-0 para que nunca se deforme ni se encoja */}
                     <div className="w-24 h-24 flex-shrink-0 rounded-full bg-blue-500 text-white flex items-center justify-center text-4xl font-bold">
                         {perfil.nombre?.charAt(0).toUpperCase()}
                     </div>
@@ -87,7 +80,6 @@ const Perfil = () => {
                         <h2 className="text-2xl font-bold">{perfil.nombre}</h2>
                         <p className="text-gray-500">{perfil.correo}</p>
                     </div>
-                    {/* BOTONES: Se mantiene azul (bg-blue-600/700) siempre, sin importar el modo */}
                     <button 
                         onClick={() => editando ? handleGuardar() : setEditando(true)}
                         className="px-4 py-2 text-sm font-semibold rounded-lg text-white transition-colors duration-200 bg-blue-600 hover:bg-blue-700"
@@ -104,7 +96,6 @@ const Perfil = () => {
                 <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Datos Físicos y Objetivos</h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Tarjeta de Peso */}
                     <div className="p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg">
                         <span className="block text-sm text-gray-500">Peso (kg)</span>
                         {editando ? (
@@ -113,7 +104,6 @@ const Perfil = () => {
                             <span className="font-semibold text-lg">{perfil.peso || '---'}</span>
                         )}
                     </div>
-                    {/* Tarjeta de Altura */}
                     <div className="p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg">
                         <span className="block text-sm text-gray-500">Altura (cm)</span>
                         {editando ? (
@@ -122,7 +112,6 @@ const Perfil = () => {
                             <span className="font-semibold text-lg">{perfil.altura || '---'}</span>
                         )}
                     </div>
-                    {/* Tarjeta Frecuencia Entrenamiento */}
                     <div className="p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg">
                         <span className="block text-sm text-gray-500">Días Entreno (Semana)</span>
                         {editando ? (
@@ -131,7 +120,6 @@ const Perfil = () => {
                             <span className="font-semibold text-lg">{perfil.frecuencia_entrenamiento || '---'}</span>
                         )}
                     </div>
-                    {/* Tarjeta Objetivo */}
                     <div className="p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg">
                         <span className="block text-sm text-gray-500">Objetivo</span>
                         {editando ? (
@@ -150,17 +138,14 @@ const Perfil = () => {
                 <h3 className="text-lg font-semibold mt-8 mb-4 text-gray-900 dark:text-gray-100">Información Personal</h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Tarjeta Género (No editable) */}
                     <div className="p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg">
                         <span className="block text-sm text-gray-500">Género</span>
                         <span className="font-semibold text-lg">{perfil.genero || 'No especificado'}</span>
                     </div>
-                    {/* Tarjeta Teléfono (No editable) */}
                     <div className="p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg">
                         <span className="block text-sm text-gray-500">Teléfono</span>
                         <span className="font-semibold text-lg">{perfil.telefono || 'Sin asignar'}</span>
                     </div>
-                    {/* Tarjeta Cuenta y Estado (No editable) */}
                     <div className="p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg">
                         <span className="block text-sm text-gray-500">Estado de cuenta</span>
                         <div className="flex gap-2 items-center mt-1">
@@ -168,7 +153,6 @@ const Perfil = () => {
                             <span className="font-semibold">{perfil.cuenta_activa ? 'Activa' : 'Pendiente Confirmar'}</span>
                         </div>
                     </div>
-                    {/* Tarjeta Miembro Desde (No editable) */}
                     <div className="p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg">
                         <span className="block text-sm text-gray-500">Miembro desde</span>
                         <span className="font-semibold text-lg">

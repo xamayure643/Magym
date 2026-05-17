@@ -1,13 +1,13 @@
 from django.db import models
 from .fields import EncryptedDataField
 
-# Create your models here.
 class Usuarios(models.Model):
     OBJETIVO_CHOICES = [
         ('Ganar músculo', 'Ganar músculo'),
         ('Perder grasa', 'Perder grasa'),
         ('Mantenimiento', 'Mantenimiento'),
     ]
+    
     id_usuario = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
     correo = models.CharField(unique=True, max_length=150)

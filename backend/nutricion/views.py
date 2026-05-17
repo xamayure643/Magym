@@ -6,14 +6,10 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Sum
 from django.utils import timezone
 from datetime import date
-
 from .models import Alimentos, RegistrosNutricion
 from .serializers import AlimentosSerializer, RegistrosNutricionSerializer
 
 class AlimentosViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    Controlador para listar y buscar alimentos (GET)
-    """
     queryset = Alimentos.objects.all().order_by('nombre')
     serializer_class = AlimentosSerializer
     permission_classes = [IsAuthenticated]
@@ -23,9 +19,6 @@ class AlimentosViewSet(viewsets.ReadOnlyModelViewSet):
     }
 
 class RegistrosNutricionViewSet(viewsets.ModelViewSet):
-    """
-    Controlador para los registros de macros del usuario
-    """
     serializer_class = RegistrosNutricionSerializer
     permission_classes = [IsAuthenticated]
 
@@ -72,7 +65,6 @@ class RegistrosNutricionViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({"error": f"Error al guardar: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    # Endpoint personalizado GET /api/nutricion/registros/hoy/ (u otra fecha)
     @action(detail=False, methods=['get'])
     def hoy(self, request):
         fecha_consulta = request.query_params.get('fecha', date.today())

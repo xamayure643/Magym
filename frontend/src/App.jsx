@@ -1,9 +1,7 @@
 import React, { useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-// Componentes
 import Sidebar from './components/Sidebar';
-// Páginas
 import Catalogo from './pages/Catalogo';
 import Login from './pages/Login';
 import Nutricion from './pages/Nutricion';

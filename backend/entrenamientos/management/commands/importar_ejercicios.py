@@ -1,10 +1,9 @@
-import requests #Peticiones API
-import time #Para los sleep
-from deep_translator import GoogleTranslator #Librería para traducir
-from django.core.management.base import BaseCommand #Para crear comandos personalizados
+import requests
+import time
+from deep_translator import GoogleTranslator
+from django.core.management.base import BaseCommand
 from entrenamientos.models import Ejercicios
 
-#Mapa para las traducciones de las categorías
 DICCIONARIO_MUSCULOS = {
     "abdominal": "Abdominales", "adductors": "Aductores", "obliques": "Oblicuos",
     "biceps": "Bíceps", "calves": "Gemelos", "chest": "Pecho", "forearms": "Antebrazos",
@@ -20,16 +19,14 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         self.stdout.write(self.style.WARNING("Descargando JSON de ejercicios..."))
 
-        #Ejercicios
         url_json = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json"
 
-        #Fotos de ejercicios
         base_url_img = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/"
         
         try:
-            r = requests.get(url_json, timeout=15) #Descargamos el JSON
-            r.raise_for_status() #Si no da 200 lanza error
-            ejercicios_api = r.json() #Cogemos la lista de ejercicios
+            r = requests.get(url_json, timeout=15)
+            r.raise_for_status()
+            ejercicios_api = r.json()
         except Exception as e:
             self.stdout.write(self.style.ERROR(f"Error JSON: {e}"))
             return

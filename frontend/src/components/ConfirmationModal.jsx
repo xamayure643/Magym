@@ -15,17 +15,14 @@ const ConfirmationModal = ({
   return (
     <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
       <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-800 max-w-sm w-full overflow-hidden">
-        {/* Header */}
         <div className="p-6 border-b border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950">
           <h2 className="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">{titulo}</h2>
         </div>
 
-        {/* Body */}
         <div className="p-6">
           <p className="text-gray-700 dark:text-zinc-300 font-medium">{mensaje}</p>
         </div>
 
-        {/* Footer */}
         <div className="p-6 border-t border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950 flex justify-end gap-4">
           <button 
             onClick={onCancel}

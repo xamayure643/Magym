@@ -2,7 +2,6 @@
 @custom-variant dark (&:is(.dark *));
 
 @layer base {
-  /* Fuerza a que cualquier campo de texto del proyecto tenga colores legibles según el tema */
   input, select, textarea {
     @apply bg-white text-gray-900 border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-md px-3 py-2;
   }

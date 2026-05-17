@@ -6,21 +6,17 @@ const Rutinas = () => {
   const [rutinas, setRutinas] = useState([]);
   const [cargando, setCargando] = useState(true);
   
-  // Estados generales del Modal
   const [modalAbierto, setModalAbierto] = useState(false);
   const [rutinaEditando, setRutinaEditando] = useState(null);
   const [nombreRutina, setNombreRutina] = useState('');
   const [busqueda, setBusqueda] = useState('');
   
-  // Estados para el modal de confirmación
   const [confirmacionAbierta, setConfirmacionAbierta] = useState(false);
   const [rutinaAEliminar, setRutinaAEliminar] = useState(null);
   
-  // Ejercicios
   const [ejerciciosDisponibles, setEjerciciosDisponibles] = useState([]);
   const [ejerciciosSeleccionados, setEjerciciosSeleccionados] = useState([]);
 
-  // Estados interactivos para Drag & Drop
   const [dragStartIdx, setDragStartIdx] = useState(null);
   const [dragEnterIdx, setDragEnterIdx] = useState(null);
 
@@ -190,7 +186,7 @@ const Rutinas = () => {
         <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
           <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-800 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
             <div className="p-6 border-b border-gray-200 dark:border-zinc-800 flex justify-between items-center bg-gray-50 dark:bg-zinc-950">
-              <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">{rutinaEditando ? 'Editar Rutina' : '✨ Nueva Rutina'}</h2>
+              <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">{rutinaEditando ? 'Editar Rutina' : 'Nueva Rutina'}</h2>
               <button onClick={() => setModalAbierto(false)} className="text-gray-400 hover:text-red-500 dark:text-zinc-500 dark:hover:text-red-400 text-3xl font-light leading-none transition-colors">&times;</button>
             </div>
             
@@ -286,7 +282,6 @@ const Rutinas = () => {
         </div>
       )}
 
-      {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
       <ConfirmationModal
         isOpen={confirmacionAbierta}
         titulo="Eliminar Rutina"
