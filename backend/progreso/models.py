@@ -14,14 +14,3 @@ class RegistrosProgreso(models.Model):
     class Meta:
         managed = False
         db_table = 'registros_progreso'
-
-class RecomendacionesIa(models.Model):
-    id_recomendacion = models.AutoField(primary_key=True)
-    id_usuario = models.ForeignKey('usuarios.Usuarios', on_delete=models.CASCADE, db_column='id_usuario')
-    fecha = models.DateTimeField(blank=True, null=True)
-    mensaje = models.TextField()
-    tipo_alerta = models.CharField(max_length=50, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'recomendaciones_ia'
