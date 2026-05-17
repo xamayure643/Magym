@@ -5,7 +5,6 @@ export const ThemeContext = createContext();
 export const ThemeProvider = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem('magym-theme');
-    // false = Modo claro por defecto
     return savedTheme ? savedTheme === 'dark' : false; 
   });
 

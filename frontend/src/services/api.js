@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://alejandro.integramarketingdigital.es/api';
 
-const api = axios.create({
+const apiUsuarios = axios.create({
     baseURL: `${API_BASE_URL}/usuarios`,
     headers: { 'Content-Type': 'application/json' }
 });
@@ -82,7 +82,7 @@ const responseInterceptor = async (error) => {
     return Promise.reject(error);
 };
 
-api.interceptors.response.use((response) => response, responseInterceptor);
+apiUsuarios.interceptors.response.use((response) => response, responseInterceptor);
 apiEntrenamientos.interceptors.response.use((response) => response, responseInterceptor);
 apiProgreso.interceptors.response.use((response) => response, responseInterceptor);
 apiNutricion.interceptors.response.use((response) => response, responseInterceptor);
@@ -90,7 +90,7 @@ apiNutricion.interceptors.response.use((response) => response, responseIntercept
 
 export const registrarUsuario = async (datosUsuario) => {
     try {
-        const response = await api.post('/registro/', datosUsuario);
+        const response = await apiUsuarios.post('/registro/', datosUsuario);
         return response.data;
     } catch (error) {
         throw error.response?.data || { general: "Error de conexión" };
@@ -99,7 +99,7 @@ export const registrarUsuario = async (datosUsuario) => {
 
 export const verificarCodigoSms = async (correo, codigo) => {
     try {
-        const response = await api.post('/verificar-sms/', { correo, codigo });
+        const response = await apiUsuarios.post('/verificar-sms/', { correo, codigo });
         return response.data;
     } catch (error) {
         throw error.response?.data || { error: "Error de conexión" };
@@ -108,7 +108,7 @@ export const verificarCodigoSms = async (correo, codigo) => {
 
 export const loginUsuario = async (credenciales) => {
     try {
-        const response = await api.post('/login/', credenciales);
+        const response = await apiUsuarios.post('/login/', credenciales);
         return response.data;
     } catch (error) {
         throw error.response?.data || { error: "Error de conexión" };
@@ -117,7 +117,7 @@ export const loginUsuario = async (credenciales) => {
 
 export const logoutUsuario = async (refresh) => {
     try {
-        const response = await api.post('/logout/', { refresh });
+        const response = await apiUsuarios.post('/logout/', { refresh });
         return response.data;
     } catch (error) {
         console.warn("Fallo silencioso en el logout del servidor", error);
@@ -128,7 +128,7 @@ export const logoutUsuario = async (refresh) => {
 export const obtenerPerfil = async () => {
     try {
         const token = localStorage.getItem('access');
-        const response = await api.get('/perfil/', {
+        const response = await apiUsuarios.get('/perfil/', {
             headers: { Authorization: `Bearer ${token}` }
         });
         return response.data;
@@ -140,7 +140,7 @@ export const obtenerPerfil = async () => {
 export const actualizarPerfil = async (datos) => {
     try {
         const token = localStorage.getItem('access');
-        const response = await api.patch('/perfil/', datos, {
+        const response = await apiUsuarios.patch('/perfil/', datos, {
             headers: { Authorization: `Bearer ${token}` }
         });
         return response.data;
