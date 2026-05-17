@@ -12,7 +12,7 @@ const Toast = ({ mensaje, onClose }) => {
   if (!mensaje) return null;
   const isError = mensaje.tipo === 'error';
   return (
-    <div className={`fixed bottom-5 right-5 z-50 flex items-center min-w-[250px] max-w-sm p-4 rounded-xl shadow-2xl border-l-4 transition-all duration-300 transform translate-x-0 ${isError ? 'bg-white dark:bg-zinc-900 border-red-500 text-red-500' : 'bg-white dark:bg-zinc-900 border-green-500 text-green-600 dark:text-green-400'}`}>
+    <div className={`fixed bottom-5 right-5 z-[60] flex items-center min-w-[250px] max-w-sm p-4 rounded-xl shadow-2xl border-l-4 transition-all duration-300 transform translate-x-0 ${isError ? 'bg-white dark:bg-zinc-900 border-red-500 text-red-500' : 'bg-white dark:bg-zinc-900 border-green-500 text-green-600 dark:text-green-400'}`}>
       <div className="flex-1 font-bold text-sm tracking-wide">{mensaje.texto}</div>
       <button onClick={onClose} className="ml-4 text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300 focus:outline-none">
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
