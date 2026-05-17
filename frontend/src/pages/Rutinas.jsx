@@ -2,9 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { obtenerRutinas, crearRutina, actualizarRutina, eliminarRutina, obtenerEjercicios } from '../services/api';
 import ConfirmationModal from '../components/ConfirmationModal';
 
+const Toast = ({ mensaje, onClose }) => {
+  useEffect(() => {
+    if (!mensaje) return;
+    const timer = setTimeout(() => onClose(), 3000);
+    return () => clearTimeout(timer);
+  }, [mensaje, onClose]);
+
+  if (!mensaje) return null;
+  const isError = mensaje.tipo === 'error';
+  return (
+    <div className={`fixed bottom-5 right-5 z-50 flex items-center min-w-[250px] max-w-sm p-4 rounded-xl shadow-2xl border-l-4 transition-all duration-300 transform translate-x-0 ${isError ? 'bg-white dark:bg-zinc-900 border-red-500 text-red-500' : 'bg-white dark:bg-zinc-900 border-green-500 text-green-600 dark:text-green-400'}`}>
+      <div className="flex-1 font-bold text-sm tracking-wide">{mensaje.texto}</div>
+      <button onClick={onClose} className="ml-4 text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300 focus:outline-none">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+  );
+};
+
 const Rutinas = () => {
   const [rutinas, setRutinas] = useState([]);
   const [cargando, setCargando] = useState(true);
+  const [mensaje, setMensaje] = useState(null);
   
   const [modalAbierto, setModalAbierto] = useState(false);
   const [rutinaEditando, setRutinaEditando] = useState(null);
@@ -32,7 +52,7 @@ const Rutinas = () => {
           setEjerciciosDisponibles(resEjercicios);
         }
       } catch (err) {
-        console.error("Error cargando rutinas", err);
+        if (!unmounted) setMensaje({ tipo: 'error', texto: 'Error al cargar rutinas' });
       } finally {
         if (!unmounted) setCargando(false);
       }
@@ -53,8 +73,9 @@ const Rutinas = () => {
       setRutinas(prev => prev.filter(r => r.id_rutina !== rutinaAEliminar));
       setConfirmacionAbierta(false);
       setRutinaAEliminar(null);
+      setMensaje({ tipo: 'exito', texto: 'Rutina eliminada correctamente' });
     } catch { 
-      alert("Error al eliminar"); 
+      setMensaje({ tipo: 'error', texto: 'Error al eliminar la rutina' });
     }
   };
 
@@ -75,8 +96,14 @@ const Rutinas = () => {
   };
 
   const handleGuardarRutina = async () => {
-    if (!nombreRutina) return alert("Ponle un nombre a la rutina.");
-    if (ejerciciosSeleccionados.length === 0) return alert("Añade al menos un ejercicio.");
+    if (!nombreRutina) {
+      setMensaje({ tipo: 'error', texto: 'Ponle un nombre a la rutina' });
+      return;
+    }
+    if (ejerciciosSeleccionados.length === 0) {
+      setMensaje({ tipo: 'error', texto: 'Añade al menos un ejercicio' });
+      return;
+    }
 
     const payload = {
       nombre: nombreRutina,
@@ -96,8 +123,9 @@ const Rutinas = () => {
       
       const resRutinas = await obtenerRutinas();
       setRutinas(resRutinas);
+      setMensaje({ tipo: 'exito', texto: 'Rutina guardada correctamente' });
     } catch {
-      alert("Error al guardar la rutina");
+      setMensaje({ tipo: 'error', texto: 'Error al guardar la rutina' });
     }
   };
 
@@ -131,6 +159,8 @@ const Rutinas = () => {
 
   return (
     <div className="p-4 md:p-8 pt-20 md:pt-8 transition-colors duration-300">
+      <Toast mensaje={mensaje} onClose={() => setMensaje(null)} />
+      
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Mis Rutinas</h1>

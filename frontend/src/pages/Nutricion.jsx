@@ -3,6 +3,25 @@ import { buscarAlimentos, obtenerNutricionHoy, eliminarRegistroAlimento, registr
 import { calcularMetas } from '../utils/calculos';
 import ConfirmationModal from '../components/ConfirmationModal';
 
+const Toast = ({ mensaje, onClose }) => {
+  useEffect(() => {
+    if (!mensaje) return;
+    const timer = setTimeout(() => onClose(), 3000);
+    return () => clearTimeout(timer);
+  }, [mensaje, onClose]);
+
+  if (!mensaje) return null;
+  const isError = mensaje.tipo === 'error';
+  return (
+    <div className={`fixed bottom-5 right-5 z-50 flex items-center min-w-[250px] max-w-sm p-4 rounded-xl shadow-2xl border-l-4 transition-all duration-300 transform translate-x-0 ${isError ? 'bg-white dark:bg-zinc-900 border-red-500 text-red-500' : 'bg-white dark:bg-zinc-900 border-green-500 text-green-600 dark:text-green-400'}`}>
+      <div className="flex-1 font-bold text-sm tracking-wide">{mensaje.texto}</div>
+      <button onClick={onClose} className="ml-4 text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300 focus:outline-none">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+  );
+};
+
 const Nutricion = () => {
     const todayStr = new Date().toISOString().split('T')[0];
 
@@ -15,7 +34,7 @@ const Nutricion = () => {
     const [metaReal, setMetaReal] = useState({ calorias: 2500, proteinas: 150 });
     const [totales, setTotales] = useState({ calorias: 0, proteinas: 0 });
     const [cargando, setCargando] = useState(false);
-    const [error, setError] = useState('');
+    const [mensaje, setMensaje] = useState(null);
 
     const [confirmacionAbierta, setConfirmacionAbierta] = useState(false);
     const [registroAEliminar, setRegistroAEliminar] = useState(null);
@@ -40,7 +59,7 @@ const Nutricion = () => {
             });
             setCargando(false);
         } catch (err) {
-            setError(err.error || 'Error al cargar los datos');
+            setMensaje({ tipo: 'error', texto: err.error || 'Error al cargar los datos' });
             setCargando(false);
         }
     };
@@ -90,8 +109,9 @@ const Nutricion = () => {
             setQueryBusqueda('');
             setGramos('');
             cargarDatosDelDia();
+            setMensaje({ tipo: 'exito', texto: 'Alimento registrado correctamente' });
         } catch (err) {
-            setError(err.error || 'Error al registrar el alimento');
+            setMensaje({ tipo: 'error', texto: err.error || 'Error al registrar el alimento' });
         }
     };
 
@@ -106,8 +126,9 @@ const Nutricion = () => {
             cargarDatosDelDia();
             setConfirmacionAbierta(false);
             setRegistroAEliminar(null);
+            setMensaje({ tipo: 'exito', texto: 'Alimento eliminado' });
         } catch (err) {
-            setError(err.error || 'Error al eliminar el alimento');
+            setMensaje({ tipo: 'error', texto: err.error || 'Error al eliminar el alimento' });
             setConfirmacionAbierta(false);
             setRegistroAEliminar(null);
         }
@@ -119,6 +140,8 @@ const Nutricion = () => {
 
     return (
         <div className="p-6 sm:p-10 max-w-4xl mx-auto space-y-6 bg-gray-50 dark:bg-zinc-950 min-h-screen text-gray-800 dark:text-gray-200 transition-colors duration-300">
+            <Toast mensaje={mensaje} onClose={() => setMensaje(null)} />
+            
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Nutrición</h1>
@@ -131,8 +154,6 @@ const Nutricion = () => {
                     className="border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-2 rounded-lg text-sm"
                 />
             </header>
-
-            {error && <div className="p-3 bg-red-100 text-red-700 rounded-lg">{error}</div>}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-zinc-800">

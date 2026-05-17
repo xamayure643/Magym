@@ -124,7 +124,7 @@ const Progreso = () => {
 
     try {
       await guardarProgreso(payload);
-      setMensaje({ tipo: 'exito', texto: `¡Progreso guardado correctamente para el ${fechaStr}! 🎉` });
+      setMensaje({ tipo: 'exito', texto: `¡Progreso guardado correctamente para el ${fechaStr}!` });
     } catch {
       setMensaje({ tipo: 'error', texto: "Ocurrió un error inesperado al guardar." });
     }

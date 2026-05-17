@@ -3,10 +3,29 @@ import { AuthContext } from '../contexts/AuthContext';
 import { obtenerPerfil, actualizarPerfil } from '../services/api';
 import { calcularMetas } from '../utils/calculos';
 
+const Toast = ({ mensaje, onClose }) => {
+  useEffect(() => {
+    if (!mensaje) return;
+    const timer = setTimeout(() => onClose(), 3000);
+    return () => clearTimeout(timer);
+  }, [mensaje, onClose]);
+
+  if (!mensaje) return null;
+  const isError = mensaje.tipo === 'error';
+  return (
+    <div className={`fixed bottom-5 right-5 z-50 flex items-center min-w-[250px] max-w-sm p-4 rounded-xl shadow-2xl border-l-4 transition-all duration-300 transform translate-x-0 ${isError ? 'bg-white dark:bg-zinc-900 border-red-500 text-red-500' : 'bg-white dark:bg-zinc-900 border-green-500 text-green-600 dark:text-green-400'}`}>
+      <div className="flex-1 font-bold text-sm tracking-wide">{mensaje.texto}</div>
+      <button onClick={onClose} className="ml-4 text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300 focus:outline-none">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+  );
+};
+
 const Perfil = () => {
     const [perfil, setPerfil] = useState(null);
     const [cargando, setCargando] = useState(true);
-    const [error, setError] = useState(null);
+    const [mensaje, setMensaje] = useState(null);
     
     const [editando, setEditando] = useState(false);
     const [formData, setFormData] = useState({});
@@ -23,7 +42,7 @@ const Perfil = () => {
                     frecuencia_entrenamiento: data.frecuencia_entrenamiento || ''
                 });
             } catch (err) {
-                setError(err.error || 'Error al cargar perfil');
+                setMensaje({ tipo: 'error', texto: err.error || 'Error al cargar perfil' });
             } finally {
                 setCargando(false);
             }
@@ -52,18 +71,19 @@ const Perfil = () => {
             const dataGuardada = await actualizarPerfil(formData);
             setPerfil(dataGuardada);
             setEditando(false);
+            setMensaje({ tipo: 'exito', texto: 'Perfil actualizado correctamente' });
         } catch (err) {
-            setError(err.error || 'Error al actualizar el perfil');
+            setMensaje({ tipo: 'error', texto: err.error || 'Error al actualizar el perfil' });
         }
     };
 
     if (cargando) return <div className="p-8 text-center text-gray-500">Cargando perfil...</div>;
-    if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
     const metas = calcularMetas(perfil);
 
     return (
         <div className="p-6 sm:p-10 max-w-3xl mx-auto space-y-6">
+            <Toast mensaje={mensaje} onClose={() => setMensaje(null)} />
             <header className="mb-6 flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-bold">Perfil de Usuario</h1>

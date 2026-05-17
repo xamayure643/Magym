@@ -3,10 +3,30 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import dayjs from 'dayjs';
 import { obtenerRutinas, obtenerTodoProgreso } from '../services/api';
 
+const Toast = ({ mensaje, onClose }) => {
+  useEffect(() => {
+    if (!mensaje) return;
+    const timer = setTimeout(() => onClose(), 3000);
+    return () => clearTimeout(timer);
+  }, [mensaje, onClose]);
+
+  if (!mensaje) return null;
+  const isError = mensaje.tipo === 'error';
+  return (
+    <div className={`fixed bottom-5 right-5 z-50 flex items-center min-w-[250px] max-w-sm p-4 rounded-xl shadow-2xl border-l-4 transition-all duration-300 transform translate-x-0 ${isError ? 'bg-white dark:bg-zinc-900 border-red-500 text-red-500' : 'bg-white dark:bg-zinc-900 border-green-500 text-green-600 dark:text-green-400'}`}>
+      <div className="flex-1 font-bold text-sm tracking-wide">{mensaje.texto}</div>
+      <button onClick={onClose} className="ml-4 text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300 focus:outline-none">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+  );
+};
+
 const Dashboard = () => {
   const [rutinas, setRutinas] = useState([]);
   const [historial, setHistorial] = useState([]);
   const [cargando, setCargando] = useState(true);
+  const [mensaje, setMensaje] = useState(null);
 
   const [rutinaElegida, setRutinaElegida] = useState('');
   const [ejercicioElegido, setEjercicioElegido] = useState('');
@@ -18,7 +38,7 @@ const Dashboard = () => {
         setRutinas(rutinasData);
         setHistorial(progresoData);
       } catch (error) {
-        console.error("Error cargando dashboard:", error);
+        setMensaje({ tipo: 'error', texto: 'Error al cargar las estadísticas' });
       } finally {
         setCargando(false);
       }
@@ -53,6 +73,8 @@ const Dashboard = () => {
 
   return (
     <div className="p-4 md:p-8 pt-20 md:pt-8 transition-colors duration-300">
+      <Toast mensaje={mensaje} onClose={() => setMensaje(null)} />
+      
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-extrabold tracking-tight mb-8 text-gray-900 dark:text-white">
           Tus Estadísticas
