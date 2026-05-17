@@ -195,7 +195,7 @@ const handleMarcarFavorito = async (idEjercicio) => {
   const cerrarToast = () => setMensaje(null);
 
   useEffect(() => {
-    setPaginaActual(1);
+    setPaginaActual(1); // eslint-disable-line react-hooks/exhaustive-deps, no-use-before-define
   }, [textoBusqueda, musculosSeleccionados, vistaActual]);
 
   const handleAñadirFiltroMusculo = (e) => {
