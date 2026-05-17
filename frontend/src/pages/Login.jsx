@@ -24,7 +24,6 @@ const Login = () => {
       const data = await loginUsuario(formData);
       login(data);
     } catch (err) {
-      // Si el error del backend indica que no está verificada, saltamos a la pantalla SMS
       const mensajeBackend = err.error || err.detail || '';
       if (mensajeBackend.toLowerCase().includes('verificada')) {
           setRequiereVerificacion(true);
@@ -42,9 +41,8 @@ const Login = () => {
       setError(null); 
       
       try {
-          // Reutilizamos la función de verificar usarndo el correo que ya introdujo en el login
           const respuesta = await verificarCodigoSms(formData.correo, codigoSms);
-          login(respuesta); // Auto-login tras verificar éxito
+          login(respuesta);
       } catch (err) {
           setError(err.error || "Error al verificar el código");
       } finally {
@@ -56,7 +54,6 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zinc-950 py-12 px-4 transition-colors duration-300">
       <div className="max-w-md w-full bg-white dark:bg-zinc-900 p-10 rounded-2xl shadow-xl border border-gray-200 dark:border-zinc-800 transition-colors duration-300">
         
-        {/* LOGIN */}
         {!requiereVerificacion ? (
           <>
             <div className="mb-8">
@@ -123,7 +120,6 @@ const Login = () => {
             </form>
           </>
         ) : (
-          /* VERIFICACIÓN SMS */
           <form onSubmit={handleVerificacion} className="space-y-4">
               <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white text-center mb-2 tracking-tight">
                   Verifica tu Cuenta
