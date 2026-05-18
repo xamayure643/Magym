@@ -46,6 +46,8 @@ class PerfilUsuarioSerializer(serializers.ModelSerializer):
             'genero', 'frecuencia_entrenamiento', 'estado_suscripcion', 
             'fecha_registro', 'objetivo', 'cuenta_activa'
         ]
+        read_only_fields = ['id_usuario', 'correo', 'estado_suscripcion', 'fecha_registro', 'cuenta_activa']
+        
     def validate_frecuencia_entrenamiento(self, value):
         if value is not None and (value < 0 or value > 7):
             raise serializers.ValidationError("Los días de entrenamiento deben estar entre 0 y 7.")
