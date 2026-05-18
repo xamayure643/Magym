@@ -6,7 +6,10 @@ import re
 class RegistroUsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuarios
-        fields = ['nombre', 'correo', 'contrasena', 'telefono', 'peso', 'altura', 'genero', 'frecuencia_entrenamiento', 'objetivo']
+        fields = [
+            'nombre', 'correo', 'contrasena', 'telefono', 'peso', 'altura',
+            'genero', 'frecuencia_entrenamiento', 'objetivo'
+            ]
         
         extra_kwargs = {
             'contrasena': {'write_only': True} 
@@ -43,7 +46,7 @@ class PerfilUsuarioSerializer(serializers.ModelSerializer):
             'genero', 'frecuencia_entrenamiento', 'estado_suscripcion', 
             'fecha_registro', 'objetivo', 'cuenta_activa'
         ]
-        def validate_frecuencia_entrenamiento(self, value):
-            if value is not None and (value < 0 or value > 7):
-                raise serializers.ValidationError("Los días de entrenamiento deben estar entre 0 y 7.")
-            return value
+    def validate_frecuencia_entrenamiento(self, value):
+        if value is not None and (value < 0 or value > 7):
+            raise serializers.ValidationError("Los días de entrenamiento deben estar entre 0 y 7.")
+        return value
